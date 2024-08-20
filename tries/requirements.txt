@@ -1,0 +1,6 @@
+polib
+transformers
+torch
+sentencepiece
+sacremoses
+protobuf
