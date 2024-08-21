@@ -1,11 +1,30 @@
 import os
-from transpo_claude import ClaudeClient
-from transpo_openai_ollama import OpenAIClient, OllamaClient
-from transpo_prompts import TranspoPromptsImpl1, TranspoPromptsImpl2
 
+# .po file context:
+# primary language (msgids)
 original_language = "English"
+# and translation language (msgstrs)
 context_language = "French"
 
+# chose the LLM client and model
+from transpo_openai_ollama import OllamaClient                                          # noqa
+client = OllamaClient(original_language, context_language, "", "gemma2:2b")
+# uses the default model llama3.1:8b
+# client = OllamaClient(original_language, context_language, "")
+
+# uses OpenAI get4o model
+# from transpo_openai_ollama import OpenAIClient                                            # noqa
+# client = OpenAIClient(original_language, context_language, "")
+
+# uses Claude Sonnet 3.5
+# from transpo_claude import ClaudeClient                                                   # noqa
+# client = ClaudeClient(original_language, context_language, "")
+
+# choose the prompt implementation
+from transpo_prompts import TranspoPromptsImpl1 as TranspoPromptsImplementation             # noqa
+# from transpo_prompts import TranspoPromptsImpl2 as TranspoPromptsImplementation
+
+# some ambiguous english sentences and their French translations for testing
 TestTranslations = [
   {"english_phrase": "She broke down", "french_translation": "Elle est tombée en panne"},
   {"english_phrase": "She broke down", "french_translation": "Elle s'est effondrée"},
@@ -20,16 +39,11 @@ TestTranslations = [
   {"english_phrase": "He gave her a ring.", "french_translation": "Il lui a donné une bague."},
   {"english_phrase": "He gave her a ring.", "french_translation": "Il lui a passé un coup de fil."},
 ]
+# the target languages to test for translation
 TestTargetLanguages = ["Italian", "Spanish", "German"]
 
 
 def main():
-
-    client = OllamaClient(original_language, context_language, "", "gemma2:2b")
-    # client = OllamaClient(original_language, context_language, "")
-    # client = OpenAIClient(original_language, context_language, "")
-    # client = ClaudeClient(original_language, context_language, "")
-    prompter = TranspoPromptsImpl1
 
     outfile_name = f"output-{client.model.replace(':', '-')}.md"
     i = 2
@@ -40,7 +54,7 @@ def main():
       for tr in TestTranslations:
         for target_language in TestTargetLanguages:
           client.target_language = target_language
-          translation = client.translate(prompter, tr['english_phrase'], tr['french_translation'])
+          translation = client.translate(TranspoPromptsImplementation, tr['english_phrase'], tr['french_translation'])
           out = f"""
 =================
 English: "{tr['english_phrase']}", French: "{tr['french_translation']}", {target_language}: "{translation}"
