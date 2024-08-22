@@ -14,8 +14,7 @@ def extract_translation(line):
     return res
 
 
-def process_file(input_file, output_file):
-    languages = ["English", "French", "Italian", "Spanish", "German"]
+def process_file(input_file, output_file, languages=["English", "French", "Italian", "Spanish", "German"]):
     translations = {}
     current_key = None
 
@@ -46,7 +45,7 @@ def process_file(input_file, output_file):
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python script.py <input_file>")
+        print(f"Usage: python {sys.argv[0]} <input_file>")
         sys.exit(1)
 
     input_file = sys.argv[1]
