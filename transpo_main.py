@@ -91,7 +91,9 @@ def main():
     Returns:
         None
     """
-    client = LLMClient(original_language, context_language, "", model)
+    client = LLMClient(original_language, context_language, "", model) if model else \
+      LLMClient(original_language, context_language, "")
+
     print(f"Using model {client.model} for {original_language} -> {context_language} -> {test_target_languages} "
           f"with an {llm_client} client")
     outfile_name = get_outfile_name(client.model)
