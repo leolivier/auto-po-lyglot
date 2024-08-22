@@ -1,4 +1,4 @@
-from transpo_abc import TranspoClient, TranspoException
+from transpo_base import TranspoClient, TranspoException
 from openai import OpenAI
 
 
@@ -43,6 +43,8 @@ class OpenAIClient(OpenAIAPICompatibleClient):
                  ):
         super().__init__(original_language, context_language, target_language, api_key, model)
         self.client = OpenAI(api_key=api_key) if api_key else OpenAI()
+
+# TODO: implement a batch openai client
 
 
 class OllamaClient(OpenAIAPICompatibleClient):
