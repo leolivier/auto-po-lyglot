@@ -1,66 +1,113 @@
-import os
+from dotenv import load_dotenv
+from os import environ
+import json
 
+load_dotenv()
+
+# where tests results will be stored
+output_dir = environ.get('OUTPUT_DIRECTORY', '.')
 # .po file context:
 # primary language (msgids)
-original_language = "English"
+original_language = environ.get('ORIGINAL_LANGUAGE', 'English')
 # and translation language (msgstrs)
-context_language = "French"
-
+context_language = environ.get('CONTEXT_LANGUAGE', 'French')
 # chose the LLM client and model
-from transpo_openai_ollama import OllamaClient                                          # noqa
-client = OllamaClient(original_language, context_language, "", "gemma2:2b")
-# uses the default model llama3.1:8b
-# client = OllamaClient(original_language, context_language, "")
+llm_client = environ.get('LLM_CLIENT', 'ollama')
+model = environ.get('LLM_MODEL', None)
+match llm_client:
+  case 'ollama':
+    from transpo_openai_ollama import OllamaClient as LLMClient
+  case 'openai':
+    # uses OpenAI GPT-4o by default
+    from transpo_openai_ollama import OpenAIClient as LLMClient
+  case 'claude':
+    # uses Claude Sonnet 3.5 by default
+    from transpo_claude import ClaudeClient as LLMClient
+  case 'claude_cached':
+    # uses Claude Sonnet 3.5, cached mode for long system prompts
+    from transpo_claude import CachedClaudeClient as LLMClient
+  case _:
+    raise Exception(f"LLM_CLIENT must be one of 'ollama', 'openai', 'claude' or 'claude_cached', not '{llm_client}'")
 
-# uses OpenAI get4o model
-# from transpo_openai_ollama import OpenAIClient                                            # noqa
-# client = OpenAIClient(original_language, context_language, "")
+# the target languages to test for translation
+test_target_languages = environ.get('TARGET_LANGUAGES', 'Spanish').split(',')
 
-# uses Claude Sonnet 3.5
-# from transpo_claude import ClaudeClient                                                   # noqa
-# client = ClaudeClient(original_language, context_language, "")
-
-# choose the prompt implementation
-from transpo_prompts import TranspoPromptsImpl1 as TranspoPromptsImplementation             # noqa
-# from transpo_prompts import TranspoPromptsImpl2 as TranspoPromptsImplementation
 
 # some ambiguous english sentences and their French translations for testing
-TestTranslations = [
-  {"english_phrase": "She broke down", "french_translation": "Elle est tombée en panne"},
-  {"english_phrase": "She broke down", "french_translation": "Elle s'est effondrée"},
-  {"english_phrase": "bank", "french_translation": "rive"},
-  {"english_phrase": "bank", "french_translation": "banque"},
-  {"english_phrase": "He saw the light.", "french_translation": "Il a compris."},
-  {"english_phrase": "He saw the light.", "french_translation": "Il a vu la lumière."},
-  {"english_phrase": "She made a call.", "french_translation": "Elle a passé un appel."},
-  {"english_phrase": "She made a call.", "french_translation": "Elle a pris une décision."},
-  {"english_phrase": "They left the room.", "french_translation": "Ils ont quitté la pièce."},
-  {"english_phrase": "They left the room.", "french_translation": "Ils ont laissé la pièce en l'état."},
-  {"english_phrase": "He gave her a ring.", "french_translation": "Il lui a donné une bague."},
-  {"english_phrase": "He gave her a ring.", "french_translation": "Il lui a passé un coup de fil."},
-]
-# the target languages to test for translation
-TestTargetLanguages = ["Italian", "Spanish", "German"]
+translations_testset = json.loads(
+  environ.get('TEST_TRANSLATIONS',
+              """[{"original_phrase": "He gave her a ring.", "context_translation": "Il lui a donné une bague."}]"""))
+# print(translations_testset)
+
+
+def get_outfile_name(model_name):
+    """
+    Generates a unique output file name based on the given model name.
+
+    Args:
+        model_name (str): The name of the model.
+
+    Returns:
+        Path: A unique output file name in the format "{model_name}_output{i}.md".
+    """
+    from pathlib import Path
+    p = Path(output_dir)
+    print("Output directory:", p)
+    if not p.is_dir():
+      raise ValueError(f"Output directory {p} does not exist.")
+    basefile_name = f"{model_name.replace(':', '-')}_output%i.md"
+    i = 0
+    while True:
+      outfile_name = p / (basefile_name % i)
+      if not outfile_name.exists():
+        print("Output file:", outfile_name)
+        return outfile_name
+      i += 1
+
+
+def extract_csv_translations(output_file):
+  from output2csv import process_file
+  from pathlib import PurePath
+  import sys
+  csv_file = PurePath(output_file).with_suffix('.csv')
+  if not output_file.exists():
+    print(f"Error: Input file '{output_file}' does not exist.")
+    sys.exit(1)
+  languages = [original_language, context_language] + test_target_languages
+  process_file(output_file, csv_file, languages)
+  print("CSV extracted to file:", csv_file)
 
 
 def main():
+    """
+    This is the main function of the program. It generates a translation file for a given model.
+    It iterates over a list of test translations and target languages, translating the English phrase
+    into the target language using the provided client and prompt implementation.
+    The translations are then written to an output file and printed to the console.
 
-    outfile_name = f"output-{client.model.replace(':', '-')}.md"
-    i = 2
-    while os.path.exists(outfile_name):
-      outfile_name = f"output{i}-{client.model.replace(':', '-')}.md"
-      i += 1
-    with open(outfile_name, 'w', newline='', encoding='utf-8') as outfile:
-      for tr in TestTranslations:
-        for target_language in TestTargetLanguages:
+    Parameters:
+        None
+
+    Returns:
+        None
+    """
+    client = LLMClient(original_language, context_language, "", model)
+    print(f"Using model {client.model} for {original_language} -> {context_language} -> {test_target_languages} "
+          f"with an {llm_client} client")
+    outfile_name = get_outfile_name(client.model)
+    with outfile_name.open('w', newline='', encoding='utf-8') as outfile:
+      for tr in translations_testset:
+        for target_language in test_target_languages:
           client.target_language = target_language
-          translation = client.translate(TranspoPromptsImplementation, tr['english_phrase'], tr['french_translation'])
           out = f"""
 =================
-English: "{tr['english_phrase']}", French: "{tr['french_translation']}", {target_language}: "{translation}"
-"""
-          print(out)
-          outfile.write(out)
+{original_language}: "{tr['original_phrase']}", {context_language}: "{tr['context_translation']}", {target_language}: """
+          print(out, end='')
+          translation = client.translate(tr['original_phrase'], tr['context_translation'])
+          print(translation)
+          outfile.write(out + translation)
+      outfile.close()
+    extract_csv_translations(outfile_name)
 
 
 if __name__ == "__main__":
