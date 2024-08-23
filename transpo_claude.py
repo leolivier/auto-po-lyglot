@@ -4,9 +4,15 @@ from transpo_base import TranspoClient, TranspoException
 
 
 class ClaudeClient(TranspoClient):
-  def __init__(self, original_language, context_language, target_language, api_key, model=None):
+  def __init__(self,
+               original_language,
+               context_language,
+               target_language,
+               api_key=None,  # ANTHROPIC_API_KEY to be provided in the environment if None here
+               model="claude-3-5-sonnet-20240620"  # default model if not provided
+               ):
     super().__init__(original_language, context_language, target_language, api_key, model)
-    self.client = anthropic.Client(self.api_key)
+    self.client = anthropic.Anthropic(api_key=self.api_key)
 
   def get_translation(self, system_prompt, user_prompt):
     try:
@@ -27,7 +33,7 @@ class ClaudeClient(TranspoClient):
             }
         ]
       )
-      return message.content
+      return message.content[0].text
     except Exception as e:
       raise TranspoException(str(e))
 
@@ -74,7 +80,7 @@ class CachedClaudeClient(ClaudeClient):
           ],
           messages=[{"role": "user", "content": user_prompt}],
         )
-        return response.content
+        return response.content[0].text
       except Exception as e:
         raise TranspoException(str(e))
     else:  # system prompt has not changed
