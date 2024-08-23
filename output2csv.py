@@ -7,7 +7,7 @@ import os
 
 
 def extract_translation(line):
-    pattern = r'(^|, )(\w+): "(.*?)"'
+    pattern = r'(^|, )(\w+):[^"]*"(.*?)"'
     matches = re.findall(pattern, line)
     res = {lang: trans for start, lang, trans in matches}
     # print(line, res)
