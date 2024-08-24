@@ -58,19 +58,25 @@ def main():
     additional_args = [
       {
          'arg': '--output_dir',
+         'env': 'OUTPUT_DIRECTORY',
          'type': str,
-         'help': 'the directory where the output files will be stored'
+         'help': 'the directory where the output files will be stored',
+         'default': '.'
       },
       {
         'arg': '--original_phrase',
+        'env': 'ORIGINAL_PHRASE',
         'type': str,
         'help': 'the sentence to be translated (otherwise, taken from .env). '
-                'If this is provided, context_translation is required'
+                'If this is provided, context_translation is required',
+        'default': None
       },
       {
         'arg': '--context_translation',
+        'env': 'CONTEXT_TRANSLATION',
         'type': str,
-        'help': 'the context translation related to the original phrase (otherwise, taken from .env)'
+        'help': 'the context translation related to the original phrase (otherwise, taken from .env)',
+        'default': None
       }
     ]
 

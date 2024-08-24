@@ -45,8 +45,10 @@ def main():
     additional_args = [
       {
          'arg': '--input_po',
+         'env': 'INPUT_PO',
          'type': str,
-         'help': 'the .po file containing the msgids (phrases to be translated) and msgstrs (context translations)'
+         'help': 'the .po file containing the msgids (phrases to be translated) and msgstrs (context translations)',
+         'default': 'tests/input/input.po'
       },
     ]
 
@@ -54,8 +56,8 @@ def main():
 
     client = params.get_client()
 
-    print(f"Using model {client.model} to translate {params.input_po} from {params.original_language} -> {params.context_language} "
-          f"-> {params.test_target_languages} with an {params.llm_client} client")
+    print(f"Using model {client.model} to translate {params.input_po} from {params.original_language} -> "
+          f"{params.context_language} -> {params.test_target_languages} with an {params.llm_client} client")
     for target_language in params.test_target_languages:
       client.target_language = target_language
       output_file = get_outfile_name(client.model, params.input_po, target_language)
@@ -68,7 +70,11 @@ def main():
           translation = client.translate(original_phrase, context_translation)
           # Update translation
           entry.msgstr = translation
-          # print(translation)
+          print(f"""==================
+English: "{original_phrase}"
+French: "{context_translation}"
+{target_language}: {translation}
+""")
     # Save the new .po file
     po.save(output_file)
 
