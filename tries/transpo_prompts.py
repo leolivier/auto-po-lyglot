@@ -1,4 +1,4 @@
-from transpo_base import TranspoPrompts
+from base import TranspoPrompts
 
 
 class TranspoPromptsImpl1(TranspoPrompts):
