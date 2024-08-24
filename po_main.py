@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from getenv import TranspoParams
-from pathlib import PurePath
+from pathlib import Path
 import polib
 
 
@@ -14,9 +14,8 @@ def get_outfile_name(model_name, input_po, target_language):
     Returns:
         Path: A unique output po file name in the format "{input_po}_{target_language}_{i}.po".
     """
-    p = PurePath(input_po)
+    p = Path(input_po)
     basefile_name = f'{p.name}_{target_language}_%i.po'
-    basefile_name = f"{model_name.replace(':', '-')}_output%i.md"
     i = 0
     while True:
       outfile_name = p.with_name(basefile_name % i)
