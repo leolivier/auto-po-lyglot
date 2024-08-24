@@ -1,4 +1,4 @@
-from transpo_base import TranspoClient, TranspoException
+from base import TranspoClient, TranspoException
 from openai import OpenAI
 
 
