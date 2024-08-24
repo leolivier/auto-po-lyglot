@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import logging
 from os import environ
+# import sys
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,8 @@ class TranspoClient(ABC):
 
   def get_system_prompt(self):
     format = environ.get("SYSTEM_PROMPT", None)
+    # print("system prompt format: ", format)
+    # sys.exit(1)
     if format is None:
       raise TranspoException("SYSTEM_PROMPT environment variable not set")
     params = {
@@ -43,7 +46,10 @@ class TranspoClient(ABC):
       "context_language": self.context_language,
       "target_language": self.target_language,
     }
-    return format.format(**params)
+    system_prompt = format.format(**params)
+    # print("system prompt:\n", system_prompt)
+    # sys.exit(1)
+    return system_prompt
 
   def get_user_prompt(self, phrase, context_translation):
     format = environ.get("USER_PROMPT", None)
