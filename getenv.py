@@ -61,6 +61,8 @@ the context translation."""
     else:
       self.test_target_languages = environ.get('TARGET_LANGUAGES', 'Spanish').split(',')
 
+    self.verbose = True if args.verbose is not None else False
+
     # semi specific management for testing and for po files
     for argument in additional_args:
       arg = argument.get('arg')[2:]
