@@ -44,19 +44,15 @@ prompt implementation."""
 
   def __init__(self, additional_args=None):
     "looks at args and returns an object with attributes of these args completed by the environ variables where needed"
-
     args = self.parse_args(additional_args)
 
     load_dotenv(override=True)
 
-    # where tests results will be stored
-    self.output_dir = args.output_dir or environ.get('OUTPUT_DIRECTORY', '.')
-    # .po file context:
-    # primary language (msgids)
+    # original language
     self.original_language = args.original_language or environ.get('ORIGINAL_LANGUAGE', 'English')
-    # and translation language (msgstrs)
+    # context translation language
     self.context_language = args.context_language or environ.get('CONTEXT_LANGUAGE', 'French')
-    # chose the LLM client and model
+    # LLM client and model
     self.llm_client = args.llm or environ.get('LLM_CLIENT', 'ollama')
     self.model = args.model or environ.get('LLM_MODEL', None)
 
@@ -66,24 +62,34 @@ prompt implementation."""
     else:
       self.test_target_languages = environ.get('TARGET_LANGUAGES', 'Spanish').split(',')
 
-    # some ambiguous original sentences and their context translations for testing
-    if args.original_phrase:
-      if not args.context_translation:
-        print("context_translation must be set when origin_phrase is set")
-        sys.exit(1)
+    # semi specific management for testing and for po files
+    for argument in additional_args:
+      arg = argument.get('arg')[2:]
+      # some ambiguous original sentences and their context translations for testing
+      if arg == 'original_phrase':
+        if args.original_phrase:
+          if not hasattr(args, 'context_translation'):
+            print("context_translation must be set when original_phrase is set")
+            sys.exit(1)
 
-      self.translations_testset = [{"original_phrase": args.original_phrase,
-                                    "context_translation": args.context_translation}]
-    else:
-      TEST_TRANSLATIONS = environ.get(
-        'TEST_TRANSLATIONS',
-        """[{"original_phrase": "He gave her a ring.", "context_translation": "Il lui a donné une bague."}]""")
-      try:
-        self.translations_testset = json.loads(TEST_TRANSLATIONS)
-      except json.decoder.JSONDecodeError:
-        print("TEST_TRANSLATIONS must be a valid JSON array\n", TEST_TRANSLATIONS)
-        sys.exit(1)
-    # print(self.translations_testset)
+          self.translations_testset = [{"original_phrase": args.original_phrase,
+                                        "context_translation": args.context_translation}]
+        else:
+          TEST_TRANSLATIONS = environ.get(
+            'TEST_TRANSLATIONS',
+            """[{"original_phrase": "He gave her a ring.", "context_translation": "Il lui a donné une bague."}]""")
+          try:
+            self.translations_testset = json.loads(TEST_TRANSLATIONS)
+          except json.decoder.JSONDecodeError:
+            print("TEST_TRANSLATIONS must be a valid JSON array\n", TEST_TRANSLATIONS)
+            sys.exit(1)
+        # print(self.translations_testset)
+      elif arg == 'context_translation':
+        continue  # already processed with original_phrase
+      else:
+        # for all other arguments, generic processing
+        val = getattr(args, arg) or environ.get(argument.get('env'), argument.get('default', None))
+        setattr(self, arg, val)
 
   def get_client(self):
     match self.llm_client:
