@@ -2,6 +2,16 @@
 from getenv import TranspoParams
 
 
+class TestParams(TranspoParams):
+  description = """
+Generates a translation file using a given model and llm type. It reads the parameters from the command line,
+and completes them when necessary from the content of .env in the same directory.
+It iterates over a list of test translations containing the original phrase and its translation
+within a context language, and for each target language, translates the original phrase
+into the target language helped with the context translation, by using the provided client and
+prompt implementation."""
+
+
 def get_outfile_name(model_name, params):
     """
     Generates a unique output file name based on the given model name.
@@ -80,7 +90,7 @@ def main():
       }
     ]
 
-    params = TranspoParams(additional_args)
+    params = TestParams(additional_args)
 
     client = params.get_client()
 
