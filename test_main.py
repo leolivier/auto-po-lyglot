@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 from getenv import TranspoParams
+from base import Logger
+
+logger = Logger(__name__)
 
 
 class TestParams(TranspoParams):
@@ -24,7 +27,7 @@ def get_outfile_name(model_name, params):
     """
     from pathlib import Path
     p = Path(params.output_dir)
-    print("Output directory:", p)
+    logger.vprint("Output directory:", p)
     if not p.is_dir():
       raise ValueError(f"Output directory {p} does not exist.")
     basefile_name = f"{model_name.replace(':', '-')}_output%i.md"
@@ -32,7 +35,7 @@ def get_outfile_name(model_name, params):
     while True:
       outfile_name = p / (basefile_name % i)
       if not outfile_name.exists():
-        print("Output file:", outfile_name)
+        logger.vprint("Output file:", outfile_name)
         return outfile_name
       i += 1
 
@@ -47,7 +50,7 @@ def extract_csv_translations(output_file, params):
     sys.exit(1)
   languages = [params.original_language, params.context_language] + params.test_target_languages
   process_file(output_file, csv_file, languages)
-  print("CSV extracted to file:", csv_file)
+  logger.vprint("CSV extracted to file:", csv_file)
 
 
 def main():
@@ -94,8 +97,8 @@ def main():
 
     client = params.get_client()
 
-    print(f"Using model {client.model} for {params.original_language} -> {params.context_language} -> {params.test_target_languages} "  # noqa
-          f"with an {params.llm_client} client")
+    logger.vprint(f"Using model {client.model} for {params.original_language} -> {params.context_language} -> "
+                  f"{params.test_target_languages} with an {params.llm_client} client")
     outfile_name = get_outfile_name(client.model, params)
     with outfile_name.open('w', newline='', encoding='utf-8') as outfile:
       for tr in params.translations_testset:
@@ -104,9 +107,9 @@ def main():
           out = f"""
 =================
 {params.original_language}: "{tr['original_phrase']}", {params.context_language}: "{tr['context_translation']}", {target_language}: """  # noqa
-          print(out, end='')
+          logger.vprint(out, end='')
           translation = client.translate(tr['original_phrase'], tr['context_translation'])
-          print(translation)
+          logger.vprint(translation)
           outfile.write(out + translation)
       outfile.close()
     extract_csv_translations(outfile_name, params)

@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 from os import environ
 import json
 import argparse
+from base import Logger
+
+logger = Logger(__name__)
 
 
 class TranspoParams:
@@ -47,6 +50,9 @@ the context translation."""
 
     load_dotenv(override=True)
 
+    self.verbose = args.verbose or bool(environ.get('VERBOSE', False))
+    logger.set_verbose(self.verbose)
+
     # original language
     self.original_language = args.original_language or environ.get('ORIGINAL_LANGUAGE', 'English')
     # context translation language
@@ -61,8 +67,6 @@ the context translation."""
     else:
       self.test_target_languages = environ.get('TARGET_LANGUAGES', 'Spanish').split(',')
 
-    self.verbose = True if args.verbose is not None else False
-
     # semi specific management for testing and for po files
     for argument in additional_args:
       arg = argument.get('arg')[2:]
@@ -70,7 +74,7 @@ the context translation."""
       if arg == 'original_phrase':
         if args.original_phrase:
           if not hasattr(args, 'context_translation'):
-            print("context_translation must be set when original_phrase is set")
+            print("Error: context_translation must be set when original_phrase is set")
             sys.exit(1)
 
           self.translations_testset = [{"original_phrase": args.original_phrase,
@@ -82,9 +86,9 @@ the context translation."""
           try:
             self.translations_testset = json.loads(TEST_TRANSLATIONS)
           except json.decoder.JSONDecodeError:
-            print("TEST_TRANSLATIONS must be a valid JSON array\n", TEST_TRANSLATIONS)
+            print("Error: TEST_TRANSLATIONS must be a valid JSON array\n", TEST_TRANSLATIONS)
             sys.exit(1)
-        # print(self.translations_testset)
+        logger.debug(self.translations_testset)
       elif arg == 'context_translation':
         continue  # already processed with original_phrase
       else:

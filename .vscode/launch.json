@@ -12,7 +12,8 @@
 			"console": "integratedTerminal",
 			"justMyCode": false,
 			"args": [
-				"--llm", "claude"
+				"--llm", "claude",
+				"--verbose"
 			]
 		}
 	]

@@ -4,13 +4,16 @@ import re
 import csv
 import sys
 import os
+from base import Logger
+
+logger = Logger(__name__)
 
 
 def extract_translation(line):
     pattern = r'(^|, )(\w+):[^"]*"(.*?)"'
     matches = re.findall(pattern, line)
     res = {lang: trans for start, lang, trans in matches}
-    # print(line, res)
+    logger.debug(line, res)
     return res
 
 
@@ -45,7 +48,7 @@ def process_file(input_file, output_file, languages=["English", "French", "Itali
 
 def main():
     if len(sys.argv) != 2:
-        print(f"Usage: python {sys.argv[0]} <input_file>")
+        print(f"Usage: {sys.argv[0]} <input_file>")
         sys.exit(1)
 
     input_file = sys.argv[1]
@@ -56,7 +59,7 @@ def main():
         sys.exit(1)
 
     process_file(input_file, output_file)
-    print(f"Conversion terminée. Le fichier CSV a été créé : {output_file}")
+    logger.vprint(f"Conversion complete. CSV file created : {output_file}")
 
 
 if __name__ == "__main__":

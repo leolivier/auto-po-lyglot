@@ -1,6 +1,7 @@
 import anthropic
+from base import TranspoClient, TranspoException, Logger
 
-from base import TranspoClient, TranspoException
+logger = Logger(__name__)
 
 
 class ClaudeClient(TranspoClient):
@@ -56,7 +57,7 @@ class CachedClaudeClient(ClaudeClient):
         ],
         messages=[{"role": "user", "content": user_prompt}],
       )
-      print("claude cached usage", response.usage)
+      logger.info("claude cached usage", response.usage)
       return response.content[0].text
     except Exception as e:
       raise TranspoException(str(e))

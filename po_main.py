@@ -2,6 +2,9 @@
 from getenv import TranspoParams
 from pathlib import Path
 import polib
+from base import Logger
+
+logger = Logger(__name__)
 
 
 def get_outfile_name(model_name, input_po, target_language):
@@ -20,7 +23,7 @@ def get_outfile_name(model_name, input_po, target_language):
     while True:
       outfile_name = p.with_name(basefile_name % i)
       if not outfile_name.exists():
-        print("Output file:", outfile_name)
+        logger.vprint("Output file:", outfile_name)
         return outfile_name
       i += 1
 
@@ -55,8 +58,8 @@ def main():
 
     client = params.get_client()
 
-    print(f"Using model {client.model} to translate {params.input_po} from {params.original_language} -> "
-          f"{params.context_language} -> {params.test_target_languages} with an {params.llm_client} client")
+    logger.vprint(f"Using model {client.model} to translate {params.input_po} from {params.original_language} -> "
+                  f"{params.context_language} -> {params.test_target_languages} with an {params.llm_client} client")
     for target_language in params.test_target_languages:
       client.target_language = target_language
       output_file = get_outfile_name(client.model, params.input_po, target_language)
@@ -69,7 +72,7 @@ def main():
           translation = client.translate(original_phrase, context_translation)
           # Update translation
           entry.msgstr = translation
-          print(f"""==================
+          logger.vprint(f"""==================
 English: "{original_phrase}"
 French: "{context_translation}"
 {target_language}: {translation}
