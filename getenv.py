@@ -8,12 +8,11 @@ import argparse
 
 class TranspoParams:
   description = """
-Generates a translation file using a given model and llm type. It reads the parameters from the command line,
-and completes them when necessary from the content of .env in the same directory.
-It iterates over a list of test translations containing the original phrase and its translation
-within a context language, and for each target language, translates the original phrase
-into the target language helped with the context translation, by using the provided client and
-prompt implementation."""
+Creates a .po translation file based on an existing one using a given model and llm type.
+It reads the parameters from the command line and completes them if necessary from the .env in the same directory.
+It iterates over the provided target languages, and for each language iterates over the entries of the input po file and,
+using the provided client, model and prompt, translates the original phrase into the target language with the help of
+the context translation."""
 
   def parse_args(self, additional_args=None):
     parser = argparse.ArgumentParser(description=self.description)
