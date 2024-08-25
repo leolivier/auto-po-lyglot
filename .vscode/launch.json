@@ -12,7 +12,12 @@
 			"console": "integratedTerminal",
 			"justMyCode": false,
 			"args": [
-				"--llm", "claude",
+				"--llm", "ollama",
+				"--model", "gemma2:2b",
+				"--input_po", "tests/input/fr/LC_MESSAGES/input.po",
+				"--target_language", "Italian",
+				"--context_language", "English",
+				"--original_language", "French",
 				"--verbose"
 			]
 		}
