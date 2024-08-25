@@ -34,27 +34,18 @@ class OpenAIAPICompatibleClient(TranspoClient):
 
 
 class OpenAIClient(OpenAIAPICompatibleClient):
-    def __init__(self,
-                 original_language,
-                 context_language,
-                 target_language,
-                 api_key=None,  # OPEN_API_KEY to be provided in the environment if None here
-                 model="gpt-4o-2024-08-06"  # default model if not provided
-                 ):
-        super().__init__(original_language, context_language, target_language, api_key, model)
-        self.client = OpenAI(api_key=api_key) if api_key else OpenAI()
+    def __init__(self, params, target_language=None):
+        params.model = params.model or "gpt-4o-2024-08-06"  # default model if not provided
+        super().__init__(params, target_language)
+        self.client = OpenAI(api_key=self.api_key) if self.api_key else OpenAI()
 
 # TODO: implement a batch openai client
 
 
 class OllamaClient(OpenAIAPICompatibleClient):
-    def __init__(self,
-                 original_language,
-                 context_language,
-                 target_language,
-                 model="llama3.1:8b",  # default model if not provided
-                 base_url='http://localhost:11434/v1'  # default Ollama local server URL
-                 ):
-        super().__init__(original_language, context_language, target_language,
-                         api_key='Ollama_Key_Unused_But_Required', model=model)
-        self.client = OpenAI(api_key=self.api_key, base_url=base_url)
+    def __init__(self, params, target_language=None):
+        params.model = params.model or "llama3.1:8b"  # default model if not provided
+        params.ollama_base_url = params.ollama_base_url or 'http://localhost:11434/v1'  # default Ollama local server URL
+        params.api_key = params.api_key or 'Ollama_Key_Unused_But_Required'  # unused Ollama API key
+        super().__init__(params, target_language)
+        self.client = OpenAI(api_key=self.api_key, base_url=self.ollama_base_url)

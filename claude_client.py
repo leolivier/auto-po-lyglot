@@ -5,14 +5,9 @@ logger = Logger(__name__)
 
 
 class ClaudeClient(TranspoClient):
-  def __init__(self,
-               original_language,
-               context_language,
-               target_language,
-               api_key=None,  # ANTHROPIC_API_KEY to be provided in the environment if None here
-               model="claude-3-5-sonnet-20240620"  # default model if not provided
-               ):
-    super().__init__(original_language, context_language, target_language, api_key, model)
+  def __init__(self, params, target_language=None):
+    params.model = params.model or "claude-3-5-sonnet-20240620"  # default model if not provided
+    super().__init__(params, target_language)
     self.client = anthropic.Anthropic(api_key=self.api_key)
 
   def get_translation(self, system_prompt, user_prompt):

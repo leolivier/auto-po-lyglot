@@ -8,12 +8,14 @@ class TranspoException(Exception):
 
 
 class TranspoClient(ABC):
-  def __init__(self, original_language, context_language, target_language, api_key, model=None):
-    self.original_language = original_language
-    self.context_language = context_language
+  def __init__(self, params, target_language=None):
+    self.original_language = params.original_language
+    self.context_language = params.context_language
+    # target language can be set later but before any translation.
+    # it can also be changed by the user at any time, the prompt will be updated automatically
     self.target_language = target_language
-    self.api_key = api_key
-    self.model = model
+    self.api_key = params.api_key
+    self.model = params.model
     logger.info(f"TranspoClient using model {self.model}")
     self.first = True
 
@@ -65,6 +67,8 @@ class TranspoClient(ABC):
     return format.format(**params)
 
   def translate(self, phrase, context_translation):
+      if self.target_language is None:
+        raise TranspoException("Error:target_language must be set before trying to translate anything")
       system_prompt = self.get_system_prompt()
       user_prompt = self.get_user_prompt(phrase, context_translation)
       return self.get_translation(system_prompt, user_prompt)
