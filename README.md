@@ -18,7 +18,9 @@ This can work with OpenAI (provided you have an OpenAI API key) or Anthropic Cla
 1. Install the dependencies: 
 
    `pip install -r requirements`
-1. Configure the parameters: see next chapter
+1. check if po_main.py is executable otherwise:
+
+   `chmod a+x po_main.py`
 
 # Configuration
 ## `.env` file
@@ -56,10 +58,14 @@ context translation.
 | option                                 |           can be used to        | supersedes variable in the .env file |
 |----------------------------------------|---------------------------------|--------------------------------------|
 |  -h, --help                            | show this help message and exit |                                      |
-|  --verbose                             | verbose mode (not yet implemented)|     VERBOSE=True or False          |
+|  --verbose                             | verbose mode                    |       VERBOSE=True or False          |
 |  --input_po INPUT_PO                   | the .po file containing the msgids (phrases to be translated) and msgstrs (context translations) | INPUT_PO |
 |  --llm LLM                             | Le type of LLM you want to use. Can be openai, ollama, claude or claude_cached. For openai or claude[_cached], you need to set the proper api key in the environment or in the .env file | LLM_CLIENT |
 |  --model MODEL                         | the name of the model to use. If not provided, a default model will be used, based on the chosen client | LLM_MODEL |
 |  --original_language ORIGINAL_LANGUAGE | the language of the original phrase | ORIGINAL_LANGUAGE |
 |  --context_language CONTEXT_LANGUAGE   | the language of the context translation | CONTEXT_LANGUAGE | 
 |  --target_language TARGET_LANGUAGE     | the language into which the original phrase will be translated | TARGET_LANGUAGES (which is an array) |
+
+# TO DO
+* Create scripts for running the tool on each OS (transpo.bat, transpo.sh, ...)
+* Create a small website to submit a po file and get it translated using po_main.py
