@@ -61,6 +61,9 @@ the context translation."""
     self.llm_client = args.llm or environ.get('LLM_CLIENT', 'ollama')
     self.model = args.model or environ.get('LLM_MODEL', None)
 
+    # ollama base url if needed
+    self.ollama_base_url = environ.get('OLLAMA_BASE_URL', 'http://localhost:11434/v1')
+
     # the target languages to test for translation
     if args.target_language:
       self.test_target_languages = [args.target_language]
@@ -113,5 +116,4 @@ the context translation."""
         raise Exception(
           f"LLM_CLIENT must be one of 'ollama', 'openai', 'claude' or 'claude_cached', not '{self.llm_client}'"
           )
-    return LLMClient(self.original_language, self.context_language, "", model=self.model) if self.model \
-      else LLMClient(self.original_language, self.context_language, "")
+    return LLMClient(self, "")
