@@ -1,0 +1,197 @@
+# French translation of cousins_matter.
+# Copyright (C) 2024 Olivier LEVILLAIN <olivier@levillain.eu>
+# This file is distributed under the same license as the Cousins Matter package.
+# <olivier@levillain.eu>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Cousins Matter 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-08-07 20:09+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Olivier LEVILLAIN <olivier@levillain.eu>\n"
+"Language-Team: French <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: cm_main/apps.py:8
+msgid "Cousins Matter!"
+msgstr "Les Cousins Comptent!"
+
+#: cm_main/followers.py:61 cm_main/tests/tests_followers.py:80
+#, python-format
+msgid "New %(followed_type)s \"%(followed_object_name)s\""
+msgstr "Nouveau %(followed_type)s \"%(followed_object_name)s\""
+
+#: cm_main/followers.py:65
+#, python-format
+msgid ""
+"%(follower_name)s has created a new %(followed_type)s "
+"\"%(followed_object_name)s\""
+msgstr ""
+"%(follower_name)s a créé un nouveau %(followed_type)s "
+"\"%(followed_object_name)s\""
+
+#: cm_main/followers.py:70 cm_main/tests/tests_followers.py:92
+#, python-format
+msgid ""
+"New %(obj_type)s added to %(followed_type)s \"%(followed_object_name)s\""
+msgstr ""
+"Nouveau %(obj_type)s ajouté au %(followed_type)s \"%(followed_object_name)s\""
+
+#: cm_main/followers.py:75
+#, python-format
+msgid ""
+"%(follower_name)s has added a new %(obj_type)s in the %(followed_type)s "
+"\"%(followed_object_name)s\""
+msgstr ""
+"%(follower_name)s a ajouté un nouveau %(obj_type)s au %(followed_type)s "
+"\"%(followed_object_name)s\""
+
+#: cm_main/followers.py:108
+#, python-brace-format
+msgid "You are no longer following this {followed_type}"
+msgstr "Tu ne suis plus ce {followed_type}"
+
+#: cm_main/followers.py:111
+#, python-brace-format
+msgid "You are now following this {followed_type}"
+msgstr "Tu suis maintenant ce {followed_type}"
+
+#: cm_main/followers.py:119 cm_main/tests/tests_followers.py:29
+#, python-format
+msgid "New follower to your %(followed_type)s \"%(followed_object_name)s\""
+msgstr ""
+"Nouveau follower pour ton %(followed_type)s \"%(followed_object_name)s\""
+
+#: cm_main/followers.py:121
+#, python-format
+msgid ""
+"%(follower_name)s is now following your %(followed_type)s "
+"\"%(followed_object_name)s\""
+msgstr ""
+"%(follower_name)s suit maintenant ton %(followed_type)s "
+"\"%(followed_object_name)s\""
+
+#: cm_main/forms.py:8
+msgid "Your message"
+msgstr "Ton message"
+
+#: cm_main/forms.py:9
+msgid "Please keep it short and avoid images."
+msgstr "Merci d'être bref et d'éviter les images."
+
+#: cm_main/forms.py:10
+msgid "Attach file"
+msgstr "Attacher un fichier"
+
+#: cm_main/forms.py:11
+msgid "You can attach a file here if needed"
+msgstr "Tu peux attacher un fichier ici si nécessaire"
+
+#: cm_main/templates/cm_main/about/site-stats.html:3
+#: cm_main/templates/cm_main/about/site-stats.html:6
+msgid "Site Statistics"
+msgstr "Statistiques du site"
+
+#: cm_main/templates/cm_main/about/site-stats.html:7
+msgid "This page displays some statistics about this site:"
+msgstr "Cette page affiche quelques statistiques sur ce site :"
+
+#: cm_main/templates/cm_main/about/site-stats.html:9
+msgid "Statistics"
+msgstr "Statistiques"
+
+#: cm_main/templates/cm_main/base.html:8
+msgid "Home"
+msgstr "Accueil"
+
+#: cm_main/templates/cm_main/base.html:68
+msgid "This site proudly built using"
+msgstr "Ce site est fièrement propulsé par"
+
+#: cm_main/templates/cm_main/base.html:70
+msgid "The source code is licensed"
+msgstr "Le code source est sous licence"
+
+#: cm_main/templates/cm_main/base.html:76
+msgid "Copyright © 2024 Cousins Matter. All rights reserved."
+msgstr "Copyright © 2024 Cousins Matter. Tous droits réservés."
+
+#: cm_main/templates/cm_main/base.html:79
+#: cm_main/templates/cm_main/navbar.html:116
+msgid "Contact the site admin"
+msgstr "Contacter l'administrateur du site"
+
+#: cm_main/templates/cm_main/common/confirm-delete-modal.html:28
+#: cm_main/templates/cm_main/common/confirm-delete-modal.html:54
+msgid "Confirm"
+msgstr "Confirmer"
+
+#: cm_main/templates/cm_main/common/confirm-delete-modal.html:32
+#: cm_main/templates/cm_main/common/confirm-delete-modal.html:58
+#: cm_main/templates/cm_main/contact/contact-form.html:16
+msgid "Cancel"
+msgstr "Annuler"
+
+#: cm_main/templates/cm_main/common/confirm-delete-modal.html:40
+#, python-format
+msgid ""
+"Enter \"<span class=\"has-text-danger\">%(expected_value)s</span>\" in the "
+"field below before pressing confirm"
+msgstr ""
+"Saisis \"<span class=\"has-text-danger\">%(expected_value)s</span>\" dans le "
+"champ ci-dessous avant d'appuyer sur confirmer."
+
+#: cm_main/templates/cm_main/common/confirm-delete-modal.html:48
+msgid ""
+"Mandatory. Deletion will not take place until the correct value is entered."
+msgstr ""
+"Obligatoire. La suppression n'aura pas lieu tant que la valeur correcte ne "
+"sera pas saisie."
+
+#: cm_main/templates/cm_main/common/include-summernote.html:6
+msgid "Toggle Note Editor Toolbar"
+msgstr "Afficher/Masquer la barre d'outils"
+
+#: cm_main/templates/cm_main/common/include-summernote.html:7
+msgid "Remaining characters:"
+msgstr "Caractères restants:"
+
+#: cm_main/templates/cm_main/common/paginate_template.html:20
+msgid "Items per page:"
+msgstr "Items par page"
+
+#: cm_main/templates/cm_main/common/paginate_template.html:40
+msgid "go to first page"
+msgstr "aller à la 1ère page"
+
+#: cm_main/templates/cm_main/common/paginate_template.html:52
+#, python-format
+msgid "go to page #%(page_num)s"
+msgstr "aller à la page #%(page_num)s"
+
+#: cm_main/templates/cm_main/common/paginate_template.html:55
+#, python-format
+msgid "page #%(page_num)s"
+msgstr "page #%(page_num)s"
+
+#: cm_main/templates/cm_main/common/paginate_template.html:68
+msgid "go to last page"
+msgstr "aller à la dernière page"
+
+#: cm_main/templates/cm_main/contact/contact-form.html:6
+#: cm_main/templates/cm_main/contact/contact-form.html:9
+msgid "Contact Form"
+msgstr "Formulaire de contact"
+
+#: cm_main/templates/cm_main/contact/contact-form.html:10
+msgid "Please fill out the form below to contact the admin of this site:"
+msgstr ""
+"Merci de remplir le formulaire ci-dessous pour contacter l'administrateur de "
+"ce site :"
+

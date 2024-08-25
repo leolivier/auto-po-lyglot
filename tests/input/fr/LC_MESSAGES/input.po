@@ -1,0 +1,520 @@
+# French translation of cousins_matter.
+# Copyright (C) 2024 Olivier LEVILLAIN <olivier@levillain.eu>
+# This file is distributed under the same license as the Cousins Matter package.
+# <olivier@levillain.eu>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Cousins Matter 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-08-07 20:09+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Olivier LEVILLAIN <olivier@levillain.eu>\n"
+"Language-Team: French <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: cm_main/apps.py:8
+msgid "Cousins Matter!"
+msgstr "Les Cousins Comptent!"
+
+#: cm_main/followers.py:61 cm_main/tests/tests_followers.py:80
+#, python-format
+msgid "New %(followed_type)s \"%(followed_object_name)s\""
+msgstr "Nouveau %(followed_type)s \"%(followed_object_name)s\""
+
+#: cm_main/followers.py:65
+#, python-format
+msgid ""
+"%(follower_name)s has created a new %(followed_type)s "
+"\"%(followed_object_name)s\""
+msgstr ""
+"%(follower_name)s a créé un nouveau %(followed_type)s "
+"\"%(followed_object_name)s\""
+
+#: cm_main/followers.py:70 cm_main/tests/tests_followers.py:92
+#, python-format
+msgid ""
+"New %(obj_type)s added to %(followed_type)s \"%(followed_object_name)s\""
+msgstr ""
+"Nouveau %(obj_type)s ajouté au %(followed_type)s \"%(followed_object_name)s\""
+
+#: cm_main/followers.py:75
+#, python-format
+msgid ""
+"%(follower_name)s has added a new %(obj_type)s in the %(followed_type)s "
+"\"%(followed_object_name)s\""
+msgstr ""
+"%(follower_name)s a ajouté un nouveau %(obj_type)s au %(followed_type)s "
+"\"%(followed_object_name)s\""
+
+#: cm_main/followers.py:108
+#, python-brace-format
+msgid "You are no longer following this {followed_type}"
+msgstr "Tu ne suis plus ce {followed_type}"
+
+#: cm_main/followers.py:111
+#, python-brace-format
+msgid "You are now following this {followed_type}"
+msgstr "Tu suis maintenant ce {followed_type}"
+
+#: cm_main/followers.py:119 cm_main/tests/tests_followers.py:29
+#, python-format
+msgid "New follower to your %(followed_type)s \"%(followed_object_name)s\""
+msgstr ""
+"Nouveau follower pour ton %(followed_type)s \"%(followed_object_name)s\""
+
+#: cm_main/followers.py:121
+#, python-format
+msgid ""
+"%(follower_name)s is now following your %(followed_type)s "
+"\"%(followed_object_name)s\""
+msgstr ""
+"%(follower_name)s suit maintenant ton %(followed_type)s "
+"\"%(followed_object_name)s\""
+
+#: cm_main/forms.py:8
+msgid "Your message"
+msgstr "Ton message"
+
+#: cm_main/forms.py:9
+msgid "Please keep it short and avoid images."
+msgstr "Merci d'être bref et d'éviter les images."
+
+#: cm_main/forms.py:10
+msgid "Attach file"
+msgstr "Attacher un fichier"
+
+#: cm_main/forms.py:11
+msgid "You can attach a file here if needed"
+msgstr "Tu peux attacher un fichier ici si nécessaire"
+
+#: cm_main/templates/cm_main/about/site-stats.html:3
+#: cm_main/templates/cm_main/about/site-stats.html:6
+msgid "Site Statistics"
+msgstr "Statistiques du site"
+
+#: cm_main/templates/cm_main/about/site-stats.html:7
+msgid "This page displays some statistics about this site:"
+msgstr "Cette page affiche quelques statistiques sur ce site :"
+
+#: cm_main/templates/cm_main/about/site-stats.html:9
+msgid "Statistics"
+msgstr "Statistiques"
+
+#: cm_main/templates/cm_main/base.html:8
+msgid "Home"
+msgstr "Accueil"
+
+#: cm_main/templates/cm_main/base.html:68
+msgid "This site proudly built using"
+msgstr "Ce site est fièrement propulsé par"
+
+#: cm_main/templates/cm_main/base.html:70
+msgid "The source code is licensed"
+msgstr "Le code source est sous licence"
+
+#: cm_main/templates/cm_main/base.html:76
+msgid "Copyright © 2024 Cousins Matter. All rights reserved."
+msgstr "Copyright © 2024 Cousins Matter. Tous droits réservés."
+
+#: cm_main/templates/cm_main/base.html:79
+#: cm_main/templates/cm_main/navbar.html:116
+msgid "Contact the site admin"
+msgstr "Contacter l'administrateur du site"
+
+#: cm_main/templates/cm_main/common/confirm-delete-modal.html:28
+#: cm_main/templates/cm_main/common/confirm-delete-modal.html:54
+msgid "Confirm"
+msgstr "Confirmer"
+
+#: cm_main/templates/cm_main/common/confirm-delete-modal.html:32
+#: cm_main/templates/cm_main/common/confirm-delete-modal.html:58
+#: cm_main/templates/cm_main/contact/contact-form.html:16
+msgid "Cancel"
+msgstr "Annuler"
+
+#: cm_main/templates/cm_main/common/confirm-delete-modal.html:40
+#, python-format
+msgid ""
+"Enter \"<span class=\"has-text-danger\">%(expected_value)s</span>\" in the "
+"field below before pressing confirm"
+msgstr ""
+"Saisis \"<span class=\"has-text-danger\">%(expected_value)s</span>\" dans le "
+"champ ci-dessous avant d'appuyer sur confirmer."
+
+#: cm_main/templates/cm_main/common/confirm-delete-modal.html:48
+msgid ""
+"Mandatory. Deletion will not take place until the correct value is entered."
+msgstr ""
+"Obligatoire. La suppression n'aura pas lieu tant que la valeur correcte ne "
+"sera pas saisie."
+
+#: cm_main/templates/cm_main/common/include-summernote.html:6
+msgid "Toggle Note Editor Toolbar"
+msgstr "Afficher/Masquer la barre d'outils"
+
+#: cm_main/templates/cm_main/common/include-summernote.html:7
+msgid "Remaining characters:"
+msgstr "Caractères restants:"
+
+#: cm_main/templates/cm_main/common/paginate_template.html:20
+msgid "Items per page:"
+msgstr "Items par page"
+
+#: cm_main/templates/cm_main/common/paginate_template.html:40
+msgid "go to first page"
+msgstr "aller à la 1ère page"
+
+#: cm_main/templates/cm_main/common/paginate_template.html:52
+#, python-format
+msgid "go to page #%(page_num)s"
+msgstr "aller à la page #%(page_num)s"
+
+#: cm_main/templates/cm_main/common/paginate_template.html:55
+#, python-format
+msgid "page #%(page_num)s"
+msgstr "page #%(page_num)s"
+
+#: cm_main/templates/cm_main/common/paginate_template.html:68
+msgid "go to last page"
+msgstr "aller à la dernière page"
+
+#: cm_main/templates/cm_main/contact/contact-form.html:6
+#: cm_main/templates/cm_main/contact/contact-form.html:9
+msgid "Contact Form"
+msgstr "Formulaire de contact"
+
+#: cm_main/templates/cm_main/contact/contact-form.html:10
+msgid "Please fill out the form below to contact the admin of this site:"
+msgstr ""
+"Merci de remplir le formulaire ci-dessous pour contacter l'administrateur de "
+"ce site :"
+
+#: cm_main/templates/cm_main/contact/contact-form.html:15
+msgid "Send"
+msgstr "Envoyer"
+
+#: cm_main/templates/cm_main/contact/email-contact-form.html:19
+#: cm_main/tests/test_contactform.py:42
+#, python-format
+msgid "%(sender_name)s sent you the following message from %(site_name)s:"
+msgstr "%(sender_name)s t'a envoyé le message suivant depuis %(site_name)s:"
+
+#: cm_main/templates/cm_main/contact/email-contact-form.html:26
+msgid "You can directly reply to this email to answer him/her."
+msgstr "Tu peux répondre directement à cet email pour lui répondre."
+
+#: cm_main/templates/cm_main/followers/email-followers-on-change.html:20
+#: cm_main/tests/tests_followers.py:84
+#, python-format
+msgid ""
+"%(author_name)s created the following %(followed_type)s <a "
+"href=\"%(followed_object_url)s\">'%(followed_object_name)s'</a>:"
+msgstr ""
+"%(author_name)s a créé le %(followed_type)s suivant <a "
+"href=\"%(followed_object_url)s\">'%(followed_object_name)s'</a>:"
+
+#: cm_main/templates/cm_main/followers/email-followers-on-change.html:24
+#: cm_main/tests/tests_followers.py:97
+#, python-format
+msgid ""
+"%(author_name)s added the following %(obj_type)s on %(followed_type)s <a "
+"href=\"%(followed_object_url)s\">'%(followed_object_name)s'</a>:"
+msgstr ""
+"%(author_name)s a ajouté le %(obj_type)s suivant sur le %(followed_type)s <a "
+"href=\"%(followed_object_url)s\">'%(followed_object_name)s'</a>:"
+
+#: cm_main/templates/cm_main/followers/email-followers-on-change.html:32
+#: cm_main/templates/cm_main/followers/new_follower.html:27
+msgid "Do not reply to this mail, it is machine generated."
+msgstr "Ne pas répondre à ce mail, il est généré par une machine."
+
+#: cm_main/templates/cm_main/followers/followers-count-tag.html:4
+#, python-format
+msgid "%(nfollowers)s member"
+msgid_plural "%(nfollowers)s members"
+msgstr[0] "%(nfollowers)s membre"
+msgstr[1] "%(nfollowers)s membres"
+
+#: cm_main/templates/cm_main/followers/followers-count-tag.html:10
+#, python-format
+msgid "%(nfollowers)s follower"
+msgid_plural "%(nfollowers)s followers"
+msgstr[0] "%(nfollowers)s follower"
+msgstr[1] "%(nfollowers)s followers"
+
+#: cm_main/templates/cm_main/followers/new_follower.html:14
+#, python-format
+msgid "Your %(followed_type)s '%(followed_object_name)s' has a new follower!"
+msgstr ""
+"Ton %(followed_type)s '%(followed_object_name)s' a un nouveau follower!"
+
+#: cm_main/templates/cm_main/followers/new_follower.html:22
+#: cm_main/tests/tests_followers.py:46
+#, python-format
+msgid ""
+"%(follower_name)s is now following your %(followed_type)s <a "
+"href=\"%(followed_url)s\">\"%(followed_object_name)s\"</a> on %(site_name)s"
+msgstr ""
+"%(follower_name)s suit maintenant ton %(followed_type)s <a "
+"href=\"%(followed_url)s\">\"%(followed_object_name)s\"</a> sur %(site_name)s"
+
+#: cm_main/templates/cm_main/followers/toggle-follow-button.html:4
+msgid "Stop Following"
+msgstr "Arréter de suivre"
+
+#: cm_main/templates/cm_main/followers/toggle-follow-button.html:11
+msgid "Follow"
+msgstr "Suivre"
+
+#: cm_main/templates/cm_main/navbar.html:26 cm_main/views/views_stats.py:106
+msgid "Members"
+msgstr "Membres"
+
+#: cm_main/templates/cm_main/navbar.html:29
+msgid "Birthdays"
+msgstr "Anniversaires"
+
+#: cm_main/templates/cm_main/navbar.html:31
+msgid "Show directory"
+msgstr "Afficher l'annuaire"
+
+#: cm_main/templates/cm_main/navbar.html:34
+msgid "Create Member"
+msgstr "Créer un Membre"
+
+#: cm_main/templates/cm_main/navbar.html:38
+msgid "Invite Member"
+msgstr "Inviter un Membre"
+
+#: cm_main/templates/cm_main/navbar.html:45 cm_main/views/views_stats.py:114
+msgid "Galleries"
+msgstr "Galeries"
+
+#: cm_main/templates/cm_main/navbar.html:48
+msgid "Create Gallery"
+msgstr "Créer une Galerie"
+
+#: cm_main/templates/cm_main/navbar.html:50
+msgid "Bulk Upload"
+msgstr "Chargement en masse"
+
+#: cm_main/templates/cm_main/navbar.html:56
+msgid "Forum"
+msgstr "Forum"
+
+#: cm_main/templates/cm_main/navbar.html:59
+msgid "Create Post"
+msgstr "Nouvelle Discussion"
+
+#: cm_main/templates/cm_main/navbar.html:64
+msgid "Chat"
+msgstr "Chat"
+
+#: cm_main/templates/cm_main/navbar.html:67
+msgid "Public Chat Rooms"
+msgstr "Salons de discussion publique"
+
+#: cm_main/templates/cm_main/navbar.html:69
+msgid "Private Chat Rooms"
+msgstr "Salons de discussion privée"
+
+#: cm_main/templates/cm_main/navbar.html:91
+msgid "Edit Pages"
+msgstr "Editer les Pages"
+
+#: cm_main/templates/cm_main/navbar.html:93
+msgid "Import members from CSV"
+msgstr "Importer des membres depuis un CSV"
+
+#: cm_main/templates/cm_main/navbar.html:96
+msgid "Export Members as CSV"
+msgstr "Exporter les membres en CSV"
+
+#: cm_main/templates/cm_main/navbar.html:114
+msgid "About the site"
+msgstr "A propos du site"
+
+#: cm_main/templates/cm_main/navbar.html:125
+msgid "Sign in"
+msgstr "Connexion"
+
+#: cm_main/templates/cm_main/navbar.html:129
+msgid "Request invitation link"
+msgstr "Demander un lien d'invitation"
+
+#: cm_main/templates/cm_main/navbar.html:138
+msgid "Profile"
+msgstr "Profil"
+
+#: cm_main/templates/cm_main/navbar.html:140
+msgid "Log Out"
+msgstr "Déconnexion"
+
+#: cm_main/tests/test_contactform.py:23
+msgid "This field is required."
+msgstr "Ce champ est obigatoire."
+
+#: cm_main/tests/test_contactform.py:29 cm_main/views/views_contact.py:65
+msgid "Your message has been sent"
+msgstr "Ton message a été envoyé"
+
+#: cm_main/tests/test_contactform.py:32 cm_main/views/views_contact.py:40
+msgid "Contact form"
+msgstr "Formulaire de contact"
+
+#: cm_main/tests/test_contactform.py:39 cm_main/views/views_contact.py:37
+#, python-format
+msgid "You have a new message from %(name)s (%(email)s). "
+msgstr "Tu as reçu un nouveau message de %(name)s (%(email)s). "
+
+#: cm_main/tests/tests_followers.py:27
+msgid "You have a new follower!"
+msgstr "Tu as un nouveau follower!"
+
+#: cm_main/tests/tests_followers.py:38
+#, python-format
+msgid ""
+"Hi %(followed_name)s, <br><a href=\"%(follower_url)s\">%(follower_name)s</a> "
+"is now following you on %(site_name)s!"
+msgstr ""
+"Bonjour %(followed_name)s, <br><a "
+"href=\"%(follower_url)s\">%(follower_name)s</a> te suit maintenant sur "
+"%(site_name)s!"
+
+#: cm_main/views/views_contact.py:41
+msgid "But your mailer tools is too old to show it :'("
+msgstr "Mais ton logiciel de messagerie est trop vieux pour l'afficher :'("
+
+#: cm_main/views/views_contact.py:60
+msgid "This file type is not supported"
+msgstr "Ce type de fichier n'est pas supporté"
+
+#: cm_main/views/views_general.py:33
+msgid "Media not found"
+msgstr "Média non trouvé"
+
+#: cm_main/views/views_stats.py:41 cm_main/views/views_stats.py:81
+msgid "Version not found"
+msgstr "Version non trouvée"
+
+#: cm_main/views/views_stats.py:55
+msgid "Your version is not up-to-date."
+msgstr "La version n'est pas à jour."
+
+#: cm_main/views/views_stats.py:58
+msgid ""
+"Please update it by running the following command:<br><code>docker-start.sh -"
+"u</code>"
+msgstr ""
+"Merci de la mettre à jour en lancant le script suivant :<br><code>docker-"
+"start.sh -u</code>"
+
+#: cm_main/views/views_stats.py:69
+msgid "Your version is up-to-date."
+msgstr "La version est à jour."
+
+#: cm_main/views/views_stats.py:75
+msgid "Your version is newer than the latest release (?!?)"
+msgstr "Ta version est plus récente que la version la plus récente (?!?)"
+
+#: cm_main/views/views_stats.py:97
+msgid "Site"
+msgstr "Site"
+
+#: cm_main/views/views_stats.py:99
+msgid "Site name"
+msgstr "Nom du site"
+
+#: cm_main/views/views_stats.py:100
+msgid "Site URL"
+msgstr "URL du site"
+
+#: cm_main/views/views_stats.py:101
+msgid "Application Version"
+msgstr "Version de l'application"
+
+#: cm_main/views/views_stats.py:102
+msgid "Latest release"
+msgstr "Dernière version"
+
+#: cm_main/views/views_stats.py:108
+msgid "Total number of members"
+msgstr "Nombre total de membres"
+
+#: cm_main/views/views_stats.py:109
+msgid "Number of active members"
+msgstr "Nombre de membres actifs"
+
+#: cm_main/views/views_stats.py:110
+msgid "Number of managed members"
+msgstr "Nombre de membres gérés"
+
+#: cm_main/views/views_stats.py:116
+msgid "Number of galleries"
+msgstr "Nombre de galeries"
+
+#: cm_main/views/views_stats.py:117
+msgid "Number of photos"
+msgstr "Nombre de photos"
+
+#: cm_main/views/views_stats.py:121
+msgid "Forums"
+msgstr "Forums"
+
+#: cm_main/views/views_stats.py:123
+msgid "Number of posts"
+msgstr "Nombre de discussions"
+
+#: cm_main/views/views_stats.py:124
+msgid "Number of post messages"
+msgstr "Nombre de messages dans les discussions"
+
+#: cm_main/views/views_stats.py:125
+msgid "Number of message comments"
+msgstr "Nombre de commentaires de messages"
+
+#: cm_main/views/views_stats.py:129
+msgid "Chats"
+msgstr "Salons de discussion"
+
+#: cm_main/views/views_stats.py:131
+msgid "Number of chat rooms"
+msgstr "Nombre de salons de discussion"
+
+#: cm_main/views/views_stats.py:132
+msgid "Number of public chat rooms"
+msgstr "Nombre de salons de discussion publique"
+
+#: cm_main/views/views_stats.py:133
+msgid "Number of private chat rooms"
+msgstr "Nombre de salons de discussion privée"
+
+#: cm_main/views/views_stats.py:134
+msgid "Number of chat messages"
+msgstr "Nombre de messages dans les salons"
+
+#: cm_main/views/views_stats.py:135
+msgid "Number of private chat messages"
+msgstr "Nombre de messages dans les salons publics"
+
+#: cm_main/views/views_stats.py:136
+msgid "Number of public chat messages"
+msgstr "Nombre de messages dans les salons privés"
+
+#: cm_main/views/views_stats.py:140
+msgid "Administrator"
+msgstr "Administrateur"
+
+#: cm_main/views/views_stats.py:142
+msgid "This site is managed by"
+msgstr "Ce site est géré par"
+
+#: cm_main/views/views_stats.py:143
+msgid "Administrator email"
+msgstr "Email de l'administrateur"

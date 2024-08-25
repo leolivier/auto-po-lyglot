@@ -1,6 +1,4 @@
 .env
-*.csv
-*.po
 *.pyc
 __pycache__/
-tests/
+tests/output/
