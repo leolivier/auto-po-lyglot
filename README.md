@@ -68,4 +68,5 @@ context translation.
 
 # TO DO
 * Create scripts for running the tool on each OS (transpo.bat, transpo.sh, ...)
+* Publish as a library on PyPi
 * Create a small website to submit a po file and get it translated using po_main.py
