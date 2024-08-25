@@ -19,7 +19,7 @@ class OpenAIAPICompatibleClient(TranspoClient):
 
     try:
         response = self.client.chat.completions.create(
-            model=self.model,
+            model=self.params.model,
             messages=[
               {"role": "system", "content": system_prompt},
               {"role": "user", "content": user_prompt},
@@ -37,7 +37,7 @@ class OpenAIClient(OpenAIAPICompatibleClient):
     def __init__(self, params, target_language=None):
         params.model = params.model or "gpt-4o-2024-08-06"  # default model if not provided
         super().__init__(params, target_language)
-        self.client = OpenAI(api_key=self.api_key) if self.api_key else OpenAI()
+        self.client = OpenAI(api_key=params.open_api_key) if hasattr(params, 'open_api_key') else OpenAI()
 
 # TODO: implement a batch openai client
 
@@ -46,6 +46,5 @@ class OllamaClient(OpenAIAPICompatibleClient):
     def __init__(self, params, target_language=None):
         params.model = params.model or "llama3.1:8b"  # default model if not provided
         params.ollama_base_url = params.ollama_base_url or 'http://localhost:11434/v1'  # default Ollama local server URL
-        params.api_key = params.api_key or 'Ollama_Key_Unused_But_Required'  # unused Ollama API key
         super().__init__(params, target_language)
-        self.client = OpenAI(api_key=self.api_key, base_url=self.ollama_base_url)
+        self.client = OpenAI(api_key='Ollama_Key_Unused_But_Required', base_url=self.params.ollama_base_url)

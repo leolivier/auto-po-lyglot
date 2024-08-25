@@ -88,11 +88,11 @@ def main():
 
     client = params.get_client()
 
-    logger.vprint(f"Using model {client.model} to translate {params.input_po} from {params.original_language} -> "
+    logger.vprint(f"Using model {client.params.model} to translate {params.input_po} from {params.original_language} -> "
                   f"{params.context_language} -> {params.test_target_languages} with an {params.llm_client} client")
     for target_language in params.test_target_languages:
       client.target_language = target_language
-      output_file = get_outfile_name(client.model, params.input_po, target_language, params.context_language)
+      output_file = get_outfile_name(client.params.model, params.input_po, target_language, params.context_language)
       # Load input .po file
       po = polib.pofile(params.input_po)
       for entry in po:

@@ -97,9 +97,9 @@ def main():
 
     client = params.get_client()
 
-    logger.vprint(f"Using model {client.model} for {params.original_language} -> {params.context_language} -> "
+    logger.vprint(f"Using model {client.params.model} for {params.original_language} -> {params.context_language} -> "
                   f"{params.test_target_languages} with an {params.llm_client} client")
-    outfile_name = get_outfile_name(client.model, params)
+    outfile_name = get_outfile_name(client.params.model, params)
     with outfile_name.open('w', newline='', encoding='utf-8') as outfile:
       for tr in params.translations_testset:
         for target_language in params.test_target_languages:

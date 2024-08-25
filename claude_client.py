@@ -1,4 +1,4 @@
-import anthropic
+from anthropic import Anthropic
 from base import TranspoClient, TranspoException, Logger
 
 logger = Logger(__name__)
@@ -8,12 +8,12 @@ class ClaudeClient(TranspoClient):
   def __init__(self, params, target_language=None):
     params.model = params.model or "claude-3-5-sonnet-20240620"  # default model if not provided
     super().__init__(params, target_language)
-    self.client = anthropic.Anthropic(api_key=self.api_key)
+    self.client = Anthropic(api_key=params.anthropic_api_key) if hasattr(params, 'anthropic_api_key') else Anthropic()
 
   def get_translation(self, system_prompt, user_prompt):
     try:
       message = self.client.messages.create(
-        model=self.model,
+        model=self.params.model,
         max_tokens=1000,
         temperature=0.2,
         system=system_prompt,
@@ -40,7 +40,7 @@ class CachedClaudeClient(ClaudeClient):
     try:
       # uses a beta endpoint, changes in the future
       response = self.client.beta.prompt_caching.messages.create(
-        model=self.model,
+        model=self.params.model,
         max_tokens=1024,
         temperature=0.2,
         system=[

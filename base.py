@@ -9,14 +9,11 @@ class TranspoException(Exception):
 
 class TranspoClient(ABC):
   def __init__(self, params, target_language=None):
-    self.original_language = params.original_language
-    self.context_language = params.context_language
+    self.params = params
     # target language can be set later but before any translation.
     # it can also be changed by the user at any time, the prompt will be updated automatically
     self.target_language = target_language
-    self.api_key = params.api_key
-    self.model = params.model
-    logger.info(f"TranspoClient using model {self.model}")
+    logger.info(f"TranspoClient using model {self.params.model}")
     self.first = True
 
   @abstractmethod
@@ -41,8 +38,8 @@ class TranspoClient(ABC):
     if format is None:
       raise TranspoException("SYSTEM_PROMPT environment variable not set")
     params = {
-      "original_language": self.original_language,
-      "context_language": self.context_language,
+      "original_language": self.params.original_language,
+      "context_language": self.params.context_language,
       "target_language": self.target_language,
     }
     system_prompt = format.format(**params)
@@ -58,8 +55,8 @@ class TranspoClient(ABC):
     if format is None:
       raise TranspoException("USER_PROMPT environment variable not set")
     params = {
-      "original_language": self.original_language,
-      "context_language": self.context_language,
+      "original_language": self.params.original_language,
+      "context_language": self.params.context_language,
       "target_language": self.target_language,
       "original_phrase": phrase,
       "context_translation": context_translation
