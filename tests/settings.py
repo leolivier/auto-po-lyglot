@@ -1,5 +1,5 @@
 # Where tests results will be stored. Can be overriden on the command line
-OUTPUT_DIRECTORY = "./output"
+OUTPUT_DIRECTORY = "./tests/output"
 
 # Some ambiguous sentences in the ORIGINAL_LANGUAGE and their CONTEXT_LANGUAGE translations for testing
 TEST_TRANSLATIONS = [
