@@ -51,13 +51,13 @@ jobs:
         envkey_OLLAMA_BASE_URL: "http://localhost:11434/v1"
         envkey_SYSTEM_PROMPT: ${{ vars.SYSTEM_PROMPT }}
         envkey_USER_PROMPT: ${{ vars.USER_PROMPT }}
-        directory: tests
+        directory: .
         file_name: .env
         fail_on_empty: false
         sort_keys: false
     - name: Test with pytest
       run: |
         mkdir -p tests/output
-        # [[ -f .env ]] && cat .env || echo "No .env file found in root"
-        # [[ -f tests/.env ]] && cat tests/.env || echo "No .env file found in tests"
-        cd tests && pytest -s ./
+        [[ -f .env ]] && cat .env || echo "No .env file found in root"
+        [[ -f tests/.env ]] && cat tests/.env || echo "No .env file found in tests"
+        pytest -s ./tests
