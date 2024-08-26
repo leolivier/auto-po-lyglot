@@ -50,7 +50,7 @@ the context translation."""
     "looks at args and returns an object with attributes of these args completed by the environ variables where needed"
     args = self.parse_args(additional_args)
 
-    load_dotenv(override=True)
+    load_dotenv(verbose=logger.verbose_mode, override=True)
 
     self.verbose = args.verbose or bool(environ.get('VERBOSE', False))
     logger.set_verbose(self.verbose)
