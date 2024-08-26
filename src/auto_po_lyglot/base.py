@@ -34,16 +34,16 @@ class TranspoClient(ABC):
     ...
 
   def get_system_prompt(self):
-    format = environ.get("SYSTEM_PROMPT", None)
-    logger.debug("system prompt format: ", format)
+    format = self.params.system_prompt if hasattr(self.params, 'system_prompt') else None
     if format is None:
       raise TranspoException("SYSTEM_PROMPT environment variable not set")
-    params = {
+    logger.debug("system prompt format: ", format)
+    prompt_params = {
       "original_language": self.params.original_language,
       "context_language": self.params.context_language,
       "target_language": self.target_language,
     }
-    system_prompt = format.format(**params)
+    system_prompt = format.format(**prompt_params)
     if self.first:
       logger.info("system prompt:\n", system_prompt)
       self.first = False
