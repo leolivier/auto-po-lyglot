@@ -36,7 +36,7 @@ class TranspoClient(ABC):
   def get_system_prompt(self):
     format = self.params.system_prompt if hasattr(self.params, 'system_prompt') else None
     if format is None:
-      print(self.params._dict)
+      print(self.params.__dict__)
       # raise TranspoException("SYSTEM_PROMPT environment variable not set")
       print("SYSTEM_PROMPT environment variable not set")
       sys.exit(1)
