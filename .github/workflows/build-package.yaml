@@ -60,5 +60,5 @@ jobs:
         mkdir -p tests/output
         [[ -f .env ]] && cat .env || echo "No .env file found in root"
         [[ -f tests/.env ]] && cat tests/.env || echo "No .env file found in tests"
-        echo "SYSTEM_PROMPT=${{ vars.SYSTEM_PROMPT }}"
+        echo "vars.SYSTEM_PROMPT=${{ vars.SYSTEM_PROMPT }}"
         pytest -s tests/
