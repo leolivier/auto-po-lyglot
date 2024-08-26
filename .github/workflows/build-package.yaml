@@ -11,10 +11,10 @@ on:
 
 jobs:
 
-  start-ollama-server:
-    uses: ./.github/workflows/run-ollama.yaml
-    with:
-      model: phi3
+  # start-ollama-server:
+  #   uses: ./.github/workflows/run-ollama.yaml
+  #   with:
+  #     model: phi3
 
   build:
     runs-on: ubuntu-latest
@@ -49,8 +49,8 @@ jobs:
         envkey_LLM_CLIENT: "ollama"
         envkey_LLM_MODEL: "phi3"
         envkey_OLLAMA_BASE_URL: "http://localhost:11434/v1"
-        envkey_SYSTEM_PROMPT: $SYSTEM_PROMPT
-        envkey_USER_PROMPT: $USER_PROMPT
+        envkey_SYSTEM_PROMPT: ${{ vars.SYSTEM_PROMPT }}
+        envkey_USER_PROMPT: ${{ vars.USER_PROMPT }}
         directory: tests
         file_name: .env
         fail_on_empty: false
