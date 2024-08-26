@@ -10,10 +10,14 @@ on:
     branches: [ "main" ]
 
 jobs:
+
+  start-ollama-server:
+    uses: ./.github/workflows/run-ollama.yml
+    with:
+      model: phi3
+
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
@@ -43,7 +47,7 @@ jobs:
         envkey_CONTEXT_LANGUAGE: "French"
         envkey_TARGET_LANGUAGES: "Italian"
         envkey_LLM_CLIENT: "ollama"
-        envkey_LLM_MODEL: "gemma2:2b"
+        envkey_LLM_MODEL: "phi3"
         envkey_OLLAMA_BASE_URL: "http://localhost:11434/v1"
         envkey_SYSTEM_PROMPT: $SYSTEM_PROMPT
         envkey_USER_PROMPT: $USER_PROMPT

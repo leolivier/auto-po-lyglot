@@ -1,0 +1,29 @@
+name: reusable Ollama Setup
+
+on:
+  workflow_call:
+    inputs:
+      model:
+        required: true
+        type: string
+        description: "Name of Ollama model to be used"
+
+jobs:
+  setup-ollama:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.ai/install.sh | sh
+          ollama --version
+
+      - name: Start Ollama service
+        run: |
+          ollama serve &
+          sleep 10  # Wait for service to start
+
+      - name: Pull Ollama model
+        run: ollama pull ${{ inputs.model }}
+
+    outputs:
+      ollama_ready: "true"
