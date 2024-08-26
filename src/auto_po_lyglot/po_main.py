@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-from getenv import TranspoParams
+from .getenv import TranspoParams
 from pathlib import Path
 import polib
-from base import Logger
+from .base import Logger
 import langcodes
 
 logger = Logger(__name__)
@@ -99,13 +99,8 @@ def main():
         if entry.msgid and not entry.fuzzy:
           context_translation = entry.msgstr if entry.msgstr else entry.msgid
           original_phrase = entry.msgid
-          translation_result = client.translate(original_phrase, context_translation).split('\n')
-          translation = translation_result[0].strip('"')
-          explanation = 'Not provided'
-          if len(translation_result) > 1:
-            translation_result.pop(0)
-            translation_result = [line for line in translation_result if line]
-            explanation = '\n'.join(translation_result)
+          translation, explanation = client.translate(original_phrase, context_translation).split('\n')
+          if explanation:
             entry.comment = explanation
           # Update translation
           entry.msgstr = translation

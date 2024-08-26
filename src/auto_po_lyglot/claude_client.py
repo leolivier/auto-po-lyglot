@@ -1,5 +1,5 @@
 from anthropic import Anthropic
-from base import TranspoClient, TranspoException, Logger
+from .base import TranspoClient, TranspoException, Logger
 
 logger = Logger(__name__)
 

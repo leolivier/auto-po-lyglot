@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import logging
 from os import environ
+import sys
 
 
 class TranspoException(Exception):
@@ -63,12 +64,24 @@ class TranspoClient(ABC):
     }
     return format.format(**params)
 
+  def process_translation(self, raw_result):
+    translation_result = raw_result.split('\n')
+    translation = translation_result[0].strip(' "')
+    explanation = 'Not provided'
+    if len(translation_result) > 1:
+      translation_result.pop(0)
+      translation_result = [line for line in translation_result if line]
+      explanation = '\n'.join(translation_result)
+
+    return translation, explanation
+
   def translate(self, phrase, context_translation):
       if self.target_language is None:
         raise TranspoException("Error:target_language must be set before trying to translate anything")
       system_prompt = self.get_system_prompt()
       user_prompt = self.get_user_prompt(phrase, context_translation)
-      return self.get_translation(system_prompt, user_prompt)
+      raw_result = self.get_translation(system_prompt, user_prompt)
+      return self.process_translation(raw_result)
 
 
 class Logger():
@@ -81,7 +94,7 @@ class Logger():
     """Print only if verbose is set"""
     if self.verbose_mode:
       print(*args, **kwargs)
-      # sys.stdout.flush()
+      sys.stdout.flush()
 
   def info(self, *args, **kwargs):
     self.logger.info(*args, **kwargs)

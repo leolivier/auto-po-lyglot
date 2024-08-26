@@ -1,0 +1,56 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python package
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest
+        pip install -r requirements.txt
+        # to allow dev package testing
+        pip install -e .
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --indent-size 2 --statistics
+    - name: Make envfile
+      uses: SpicyPizza/create-envfile@v2.0.3
+      with:
+        envkey_VERBOSE: true # optional
+        envkey_INPUT_PO: "tests/input/input.po"
+        envkey_ORIGINAL_LANGUAGE: "English"
+        envkey_CONTEXT_LANGUAGE: "French"
+        envkey_TARGET_LANGUAGES: "Italian"
+        envkey_LLM_CLIENT: "ollama"
+        envkey_LLM_MODEL: "gemma2:2b"
+        envkey_OLLAMA_BASE_URL: "http://localhost:11434/v1"
+        envkey_SYSTEM_PROMPT: $SYSTEM_PROMPT
+        envkey_USER_PROMPT: $USER_PROMPT
+        directory: tests
+        file_name: .env
+        fail_on_empty: false
+        sort_keys: false
+    - name: Test with pytest
+      run: |
+        pytest -s tests/

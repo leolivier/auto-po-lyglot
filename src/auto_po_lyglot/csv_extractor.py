@@ -4,7 +4,7 @@ import re
 import csv
 import sys
 import os
-from base import Logger
+from .base import Logger
 
 logger = Logger(__name__)
 

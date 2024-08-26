@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-import sys
 from dotenv import load_dotenv
 from os import environ
-import json
 import argparse
-from base import Logger
+from .base import Logger
 
 logger = Logger(__name__)
 
@@ -38,8 +36,12 @@ the context translation."""
                         type=str,
                         help='the language into which the original phrase will be translated')
     parser.add_argument('--verbose', action='store_true', help='verbose mode')
-    for arg in additional_args:
-      parser.add_argument(arg.get('arg'), type=arg.get('type'), help=arg.get('help'))
+    if additional_args:
+      for arg in additional_args:
+        if arg.get('action'):
+          parser.add_argument(arg.get('arg'), action=arg.get('action'), help=arg.get('help'))
+        else:
+          parser.add_argument(arg.get('arg'), type=arg.get('type'), help=arg.get('help'))
 
     # Analyze the arguments
     return parser.parse_args()
@@ -70,48 +72,28 @@ the context translation."""
     else:
       self.test_target_languages = environ.get('TARGET_LANGUAGES', 'Spanish').split(',')
 
-    # semi specific management for testing and for po files
-    for argument in additional_args:
-      arg = argument.get('arg')[2:]
-      # some ambiguous original sentences and their context translations for testing
-      if arg == 'original_phrase':
-        if args.original_phrase:
-          if not hasattr(args, 'context_translation'):
-            print("Error: context_translation must be set when original_phrase is set")
-            sys.exit(1)
-
-          self.translations_testset = [{"original_phrase": args.original_phrase,
-                                        "context_translation": args.context_translation}]
-        else:
-          TEST_TRANSLATIONS = environ.get(
-            'TEST_TRANSLATIONS',
-            """[{"original_phrase": "He gave her a ring.", "context_translation": "Il lui a donné une bague."}]""")
-          try:
-            self.translations_testset = json.loads(TEST_TRANSLATIONS)
-          except json.decoder.JSONDecodeError:
-            print("Error: TEST_TRANSLATIONS must be a valid JSON array\n", TEST_TRANSLATIONS)
-            sys.exit(1)
-        logger.debug(self.translations_testset)
-      elif arg == 'context_translation':
-        continue  # already processed with original_phrase
-      else:
-        # for all other arguments, generic processing
+    # generic processing of additional arguments
+    if additional_args:
+      for argument in additional_args:
+        arg = argument.get('arg')
+        while arg.startswith('-'):
+          arg = arg[1:]
         val = getattr(args, arg) or environ.get(argument.get('env'), argument.get('default', None))
         setattr(self, arg, val)
 
   def get_client(self):
     match self.llm_client:
       case 'ollama':
-        from openai_ollama_client import OllamaClient as LLMClient
+        from .openai_ollama_client import OllamaClient as LLMClient
       case 'openai':
         # uses OpenAI GPT-4o by default
-        from openai_ollama_client import OpenAIClient as LLMClient
+        from .openai_ollama_client import OpenAIClient as LLMClient
       case 'claude':
         # uses Claude Sonnet 3.5 by default
-        from claude_client import ClaudeClient as LLMClient
+        from .claude_client import ClaudeClient as LLMClient
       case 'claude_cached':
         # uses Claude Sonnet 3.5, cached mode for long system prompts
-        from claude_client import CachedClaudeClient as LLMClient
+        from .claude_client import CachedClaudeClient as LLMClient
       case _:
         raise Exception(
           f"LLM_CLIENT must be one of 'ollama', 'openai', 'claude' or 'claude_cached', not '{self.llm_client}'"
