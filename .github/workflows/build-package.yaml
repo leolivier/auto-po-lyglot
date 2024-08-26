@@ -57,4 +57,5 @@ jobs:
         sort_keys: false
     - name: Test with pytest
       run: |
+        mkdir -p tests/output
         pytest -s tests/
