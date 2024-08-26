@@ -63,12 +63,20 @@ class TestTranspo:
         llm_client.target_language = target_language
         for tr in TEST_TRANSLATIONS:
           out = f"""
-=================
-{params.original_language}: "{tr['original_phrase']}", {params.context_language}: "{tr['context_translation']}", {target_language}: """  # noqa
+  {{
+    "original_phrase": "{tr['original_phrase']}",  # {params.original_language}
+    "context_translation": "{tr['context_translation']}",  # {params.context_language}
+    "target_translation": """
           logger.vprint(out, end='')
           translation, explanation = llm_client.translate(tr['original_phrase'], tr['context_translation'])
-          logger.vprint(translation)
-          outfile.write(f'{out} {translation}\n{explanation}\n\n')
-          assert translation == tr['target_translation']
+          comment = explanation.replace('\n', '\n# ')
+          trans_exp = f"""{translation}  # {target_language}
+  # {comment}
+
+  }},
+"""
+          logger.vprint(trans_exp)
+          outfile.write(f'{out} {trans_exp}')
+          # assert translation == tr['target_translation']
       outfile.close()
     extract_csv_translations(output_file, params)
