@@ -28,7 +28,7 @@ def output_file(llm_client):
   p = Path(OUTPUT_DIRECTORY)
   logger.vprint("Output directory:", p)
   if not p.is_dir():
-    raise ValueError(f"Output directory {p} does not exist.")
+    p.mkdir(parents=True, exist_ok=True)
   basefile_name = f"{llm_client.params.model.replace(':', '-')}_output%i.md"
   i = 0
   while True:
