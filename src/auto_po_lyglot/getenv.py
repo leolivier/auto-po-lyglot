@@ -48,13 +48,15 @@ the context translation."""
 
   def __init__(self, additional_args=None):
     "looks at args and returns an object with attributes of these args completed by the environ variables where needed"
+    self._client = None
+
     args = self.parse_args(additional_args)
 
-    load_dotenv(verbose=True, override=True)
+    load_dotenv(override=True)
 
     self.verbose = args.verbose or bool(environ.get('VERBOSE', False))
     logger.set_verbose(self.verbose)
-
+      
     # original language
     self.original_language = args.original_language or environ.get('ORIGINAL_LANGUAGE', 'English')
     # context translation language
@@ -72,6 +74,9 @@ the context translation."""
     else:
       self.test_target_languages = environ.get('TARGET_LANGUAGES', 'Spanish').split(',')
 
+    self.system_prompt = environ.get('SYSTEM_PROMPT', None)
+    self.user_prompt = environ.get('USER_PROMPT', None)
+
     # generic processing of additional arguments
     if additional_args:
       for argument in additional_args:
@@ -82,20 +87,24 @@ the context translation."""
         setattr(self, arg, val)
 
   def get_client(self):
-    match self.llm_client:
-      case 'ollama':
-        from .openai_ollama_client import OllamaClient as LLMClient
-      case 'openai':
-        # uses OpenAI GPT-4o by default
-        from .openai_ollama_client import OpenAIClient as LLMClient
-      case 'claude':
-        # uses Claude Sonnet 3.5 by default
-        from .claude_client import ClaudeClient as LLMClient
-      case 'claude_cached':
-        # uses Claude Sonnet 3.5, cached mode for long system prompts
-        from .claude_client import CachedClaudeClient as LLMClient
-      case _:
-        raise Exception(
-          f"LLM_CLIENT must be one of 'ollama', 'openai', 'claude' or 'claude_cached', not '{self.llm_client}'"
-          )
-    return LLMClient(self, "")
+    if not self._client:
+
+      match self.llm_client:
+        case 'ollama':
+          from .openai_ollama_client import OllamaClient as LLMClient
+        case 'openai':
+          # uses OpenAI GPT-4o by default
+          from .openai_ollama_client import OpenAIClient as LLMClient
+        case 'claude':
+          # uses Claude Sonnet 3.5 by default
+          from .claude_client import ClaudeClient as LLMClient
+        case 'claude_cached':
+          # uses Claude Sonnet 3.5, cached mode for long system prompts
+          from .claude_client import CachedClaudeClient as LLMClient
+        case _:
+          raise Exception(
+            f"LLM_CLIENT must be one of 'ollama', 'openai', 'claude' or 'claude_cached', not '{self.llm_client}'"
+            )
+      self._client = LLMClient(self, "")
+
+    return self._client
