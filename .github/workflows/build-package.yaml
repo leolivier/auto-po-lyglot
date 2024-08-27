@@ -9,12 +9,23 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  LLM_CLIENT: ollama
+  MODEL: phi3
+  VERBOSE: true # optional
+  INPUT_PO: tests/input/input.po
+  ORIGINAL_LANGUAGE: English
+  CONTEXT_LANGUAGE: French
+  TARGET_LANGUAGES: Italian  # comma separated list
+  OLLAMA_BASE_URL: "http://localhost:11434/v1"
+
+
 jobs:
 
-  # start-ollama-server:
-  #   uses: ./.github/workflows/run-ollama.yaml
-  #   with:
-  #     model: phi3
+  start-ollama-server:
+    uses: ./.github/workflows/run-ollama.yaml
+    with:
+      model: ${{ env.MODEL }}
 
   build:
     runs-on: ubuntu-latest
@@ -41,14 +52,14 @@ jobs:
     - name: Make envfile
       uses: SpicyPizza/create-envfile@v2.0.3
       with:
-        envkey_VERBOSE: true # optional
-        envkey_INPUT_PO: "tests/input/input.po"
-        envkey_ORIGINAL_LANGUAGE: "English"
-        envkey_CONTEXT_LANGUAGE: "French"
-        envkey_TARGET_LANGUAGES: "Italian"
-        envkey_LLM_CLIENT: "ollama"
-        envkey_LLM_MODEL: "phi3"
-        envkey_OLLAMA_BASE_URL: "http://localhost:11434/v1"
+        envkey_VERBOSE: ${{ env.VERBOSE }} # optional
+        envkey_INPUT_PO: ${{ env.INPUT_PO }}
+        envkey_ORIGINAL_LANGUAGE: ${{ env.ORIGINAL_LANGUAGE }}
+        envkey_CONTEXT_LANGUAGE: ${{ env.CONTEXT_LANGUAGE }}
+        envkey_TARGET_LANGUAGES: ${{ env.TARGET_LANGUAGES }}
+        envkey_LLM_CLIENT: ${{ env.LLM_CLIENT }}
+        envkey_LLM_MODEL: ${{ env.MODEL }}
+        envkey_OLLAMA_BASE_URL: ${{ env.OLLAMA_BASE_URL }}
         envkey_SYSTEM_PROMPT: ${{ vars.SYSTEM_PROMPT }}
         envkey_USER_PROMPT: ${{ vars.USER_PROMPT }}
         directory: .
