@@ -28,16 +28,14 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
-        pip install -r requirements.txt
-        # to allow dev package testing
-        pip install -e .
+        python -m pip install uv  # install python manager
+        uv pip install -e .  # to allow dev package testing
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        uv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --indent-size 2 --statistics
+        uv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --indent-size 2 --statistics
     - name: Make envfile
       uses: SpicyPizza/create-envfile@v2.0.3
       with:
@@ -57,7 +55,6 @@ jobs:
         sort_keys: false
     - name: Test with pytest
       run: |
-        mkdir -p tests/output
-        [[ -f .env ]] && cat .env || echo "No .env file found in root"
-        [[ -f tests/.env ]] && cat tests/.env || echo "No .env file found in tests"
-        pytest -s ./tests
+        # [[ -f .env ]] && cat .env || echo "No .env file found in root"
+        # [[ -f tests/.env ]] && cat tests/.env || echo "No .env file found in tests"
+        uv run pytest -s ./tests
