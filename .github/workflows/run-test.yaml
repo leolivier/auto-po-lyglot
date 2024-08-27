@@ -7,11 +7,11 @@ on:
         type: string
         description: "a parameter for testing"
 jobs:
-  setup-ollama:
+  reusable-job:
     runs-on: ubuntu-latest
     steps:
       - name: simple echo
         run: |
-          echo "reusable test done wit model ${{ inputs.my_parameter }}"
+          echo "reusable test done wit my_parameter= ${{ inputs.my_parameter }}"
     outputs:
       test_ready: "true"
