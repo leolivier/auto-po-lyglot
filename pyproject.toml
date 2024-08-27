@@ -12,15 +12,26 @@ authors = [
 description = "A Python package to translate po files using AI"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies=["polib>=1.2.0", "openai>=1.12.0", "python-dotenv>=1.0.1", "anthropic>=0.34.1", "langcodes>=3.4.0"]
+dependencies=[
+  "polib>=1.2.0",
+  "openai>=1.12.0",
+  "python-dotenv>=1.0.1",
+  "anthropic>=0.34.1",
+  "langcodes>=3.4.0",
+  "pytest>=8.3.2",
+  "flake8>=7.1.1",
+]
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Development Status :: 4 - Beta",
-
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Development Status :: 4 - Beta",
 ]
 keywords = ["python", "poet", "translation", "llm", "AI"]
+
+[tool.uv]
+dev-dependencies = [
+]
 
 [project.urls]
 Homepage = "https://github.com/leolivier/transpo"
