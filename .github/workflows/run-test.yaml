@@ -1,0 +1,17 @@
+name: reusable workflow
+on:
+  workflow_call:
+    inputs:
+      my_parameter:
+        required: true
+        type: string
+        description: "a parameter for testing"
+jobs:
+  setup-ollama:
+    runs-on: ubuntu-latest
+    steps:
+      - name: simple echo
+        run: |
+          echo "reusable test done wit model ${{ inputs.my_parameter }}"
+    outputs:
+      test_ready: "true"
