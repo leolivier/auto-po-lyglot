@@ -28,8 +28,9 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install uv  # install python manager
-        uv venv .  # create a virtual environment
+        python -m pip install --upgrade uv  # install python manager
+        uv sync .  # create a virtual environment and install dependencies
+        source .venv/bin/activate  # activate the virtual environment
         uv pip install -e .  # to allow dev package testing
     - name: Lint with flake8
       run: |
