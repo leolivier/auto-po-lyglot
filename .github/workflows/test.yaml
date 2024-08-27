@@ -5,14 +5,24 @@ on:
 env:
   MY_PARAMETER: 'a value'
 jobs:
+  set-env:
+    runs-on: ubuntu-latest
+    outputs:
+      MY_PARAMETER: ${{ steps.set-output.outputs.MY_PARAMETER }}
+    steps:
+      - name: Set environment variable
+        id: set-output
+        run: echo "MY_PARAMETER=${{env.MY_PARAMETER}}" >> $GITHUB_ENV
+
   start-reusable-job:
+    needs: set-env
     uses: ./.github/workflows/run-test.yaml
     with:
-      my_parameter: ${{env.MY_PARAMETER}}
+      my_parameter: ${{ needs.set-env.outputs.MY_PARAMETER }}
   next-job:
     runs-on: ubuntu-latest
     needs: start-reusable-job
     steps:
     - name: test
       run: |
-        echo "it works!"
+        echo "it works with ${{env.MY_PARAMETER}}!"
