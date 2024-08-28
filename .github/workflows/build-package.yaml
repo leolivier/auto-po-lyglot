@@ -23,27 +23,22 @@ env:
 
 jobs:
 
-  env-setup:
-    name: Setup Dynamic Environment Variables
+  setup-ollama:
     runs-on: ubuntu-latest
-    outputs:
-      model: ${{ steps.set-output-defaults.outputs.model }}
     steps:
-      - name: set outputs with default values
-        id: set-output-defaults
-        run: |    
-          # If workflow_dispatch, use inputs (left), if other trigger, use default env (right)
-          echo "::set-output name=model::${{ env.MODEL || 'llama3.1:8b' }}"
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.ai/install.sh | sh
+          ollama --version
 
-  start-ollama-server:
-    needs: [env-setup]
-    uses: ./.github/workflows/run-ollama.yaml
-    with:
-      model: ${{needs.env-setup.outputs.model}}
+      - name: Start Ollama service and pull the model
+        run: |
+          ollama serve &
+          ollama pull ${{ env.MODEL }}
 
   build:
     runs-on: ubuntu-latest
-    needs: start-ollama-server
+    needs: setup-ollama
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
