@@ -12,7 +12,7 @@ on:
 
 env:
   LLM_CLIENT: ollama
-  MODEL: phi3   # WARNING!!! Needs to be duplicated in the start-ollama-server.yaml job! Can't pass ${{env.MODEL}}
+  MODEL: phi3
   VERBOSE: true # optional
   INPUT_PO: tests/input/input.po
   ORIGINAL_LANGUAGE: English
@@ -23,10 +23,23 @@ env:
 
 jobs:
 
+  env-setup:
+    name: Setup Dynamic Environment Variables
+    runs-on: ubuntu-latest
+    outputs:
+      model: ${{ steps.set-output-defaults.outputs.model }}
+    steps:
+      - name: set outputs with default values
+        id: set-output-defaults
+        run: |    
+          # If workflow_dispatch, use inputs (left), if other trigger, use default env (right)
+          echo "::set-output name=model::${{ env.MODEL || 'llama3.1:8b' }}"
+
   start-ollama-server:
+    needs: [env-setup]
     uses: ./.github/workflows/run-ollama.yaml
     with:
-      model: phi3
+      model: ${{needs.env-setup.outputs.model}}
 
   build:
     runs-on: ubuntu-latest
