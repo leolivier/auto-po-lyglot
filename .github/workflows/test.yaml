@@ -2,11 +2,13 @@ name: Main Workflow
 
 on: [push]
 
-env:
-  PARAM: value
-
 jobs:
   call-reusable-workflow:
-    uses: ./.github/workflows/run-test.yaml
-    with:
-      my_param: ${{ env.PARAM }}
+    runs-on: ubuntu-latest
+    env:
+      PARAM: value
+    steps:
+      - name: Call reusable workflow
+        uses: ./.github/workflows/reusable.yml
+        with:
+          my_param: ${{ env.PARAM }}
