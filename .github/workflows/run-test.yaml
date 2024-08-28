@@ -2,14 +2,10 @@ name: Reusable Workflow
 
 on:
   workflow_call:
-    inputs:
-      my_param:
-        required: true
-        type: string
 
 jobs:
   example-job:
     runs-on: ubuntu-latest
     steps:
       - name: Print parameter
-        run: echo ${{ inputs.my_param }}
+        run: echo "param value=${{ env.PARAM }}"

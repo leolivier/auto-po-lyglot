@@ -8,5 +8,3 @@ env:
 jobs:
   call-reusable-workflow:
     uses: ./.github/workflows/run-test.yaml
-    with:
-      my_param: ${{ PARAM }}
