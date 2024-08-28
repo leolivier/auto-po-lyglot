@@ -1,17 +1,15 @@
-name: reusable workflow
+name: Reusable Workflow
+
 on:
   workflow_call:
     inputs:
-      my_parameter:
+      my_param:
         required: true
         type: string
-        description: "a parameter for testing"
+
 jobs:
-  reusable-job:
+  example-job:
     runs-on: ubuntu-latest
     steps:
-      - name: simple echo
-        run: |
-          echo "reusable test done wit my_parameter= ${{ inputs.my_parameter }}"
-    outputs:
-      test_ready: "true"
+      - name: Print parameter
+        run: echo ${{ inputs.my_param }}

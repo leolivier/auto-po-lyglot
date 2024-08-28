@@ -1,28 +1,12 @@
-name: Python package
-on:
-  push:
-    branches: ["*"]
-env:
-  MY_PARAMETER: 'a value'
-jobs:
-  set-env:
-    runs-on: ubuntu-latest
-    outputs:
-      MY_PARAMETER: ${{ steps.set-output.outputs.MY_PARAMETER }}
-    steps:
-      - name: Set environment variable
-        id: set-output
-        run: echo "MY_PARAMETER=${{env.MY_PARAMETER}}" >> $GITHUB_ENV
+name: Main Workflow
 
-  start-reusable-job:
-    needs: set-env
+on: [push]
+
+env:
+  PARAM: value
+
+jobs:
+  call-reusable-workflow:
     uses: ./.github/workflows/run-test.yaml
     with:
-      my_parameter: ${{ needs.set-env.outputs.MY_PARAMETER }}
-  next-job:
-    runs-on: ubuntu-latest
-    needs: start-reusable-job
-    steps:
-    - name: test
-      run: |
-        echo "it works with ${{env.MY_PARAMETER}}!"
+      my_param: ${{ env.PARAM }}
