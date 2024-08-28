@@ -9,6 +9,6 @@ jobs:
       PARAM: value
     steps:
       - name: Call reusable workflow
-        uses: ./.github/workflows/run-test.yml
+        uses: ./.github/workflows/run-test.yaml
         with:
           my_param: ${{ env.PARAM }}
