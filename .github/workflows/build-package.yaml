@@ -19,7 +19,13 @@ env:
   CONTEXT_LANGUAGE: French
   TARGET_LANGUAGES: Italian  # comma separated list
   OLLAMA_BASE_URL: "http://localhost:11434/v1"
-
+  # 2 files used to cache the Ollama version and model list
+  # so that they do not need to be downloaded every time
+  # Touch this file to force it to update Ollama
+  OLLAMA_VERSION_FILE: '.github/workflows/ollama-version.txt'
+  # Put in this file a list of all models you want to pull from Ollama, one per line. 
+  # MODEL must be set to one of these
+  MODEL_LIST_FILE: '.github/workflows/model-list.txt'
 
 jobs:
 
@@ -35,7 +41,7 @@ jobs:
           path: |
             ~/.ollama
             /usr/local/bin/ollama
-          key: ${{ runner.os }}-ollama-${{ hashFiles('**/ollama-version.txt') }}
+          key: ${{ runner.os }}-ollama-${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
           restore-keys: |
             ${{ runner.os }}-ollama-
 
@@ -44,6 +50,14 @@ jobs:
           if [ ! -f /usr/local/bin/ollama ]; then
             curl https://ollama.ai/install.sh | sh
           fi
+          # This can't work because we can't control the version of Ollama
+          # that is installed. So, just touch the OLLAMA_VERSION_FILE to force it to update
+          # INSTALLED_VERSION=$(ollama --version)
+          # DESIRED_VERSION=$(cat ${{ env.OLLAMA_VERSION_FILE }})
+          # if [ "$INSTALLED_VERSION" != "$DESIRED_VERSION" ]; then
+          #   echo "Updating Ollama to version $DESIRED_VERSION"
+          #   curl https://ollama.ai/install.sh | sh
+          # fi
 
       - name: Start Ollama and wait for it to serve
         run: | 
@@ -54,13 +68,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.ollama/models
-          key: ${{ runner.os }}-ollama-models-${{ hashFiles('**/model-list.txt') }}
+          key: ${{ runner.os }}-ollama-models-${{ hashFiles(env.MODEL_LIST_FILE) }}
 
       - name: Pull Ollama model
         run: |
-          if [ ! -f ~/.ollama/models/${{ env.MODEL }}.bin ]; then
-            ollama pull ${{ env.MODEL }}
-          fi
+          while IFS= read -r model || [[ -n "$model" ]]; do
+            if [ ! -f ~/.ollama/models/${model}.bin ]; then
+              ollama pull $model
+            fi
+          done < ${{ env.MODEL_LIST_FILE }}
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v5

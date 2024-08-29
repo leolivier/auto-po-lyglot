@@ -1,0 +1,2 @@
+phi3:latest
+gemma2:2b

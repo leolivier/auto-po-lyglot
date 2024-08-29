@@ -1,0 +1,3 @@
+# Touch this file or change its contents 
+# to force the GitHub workflow to install the 
+# latest version of Ollama.
