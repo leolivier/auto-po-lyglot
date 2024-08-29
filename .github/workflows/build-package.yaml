@@ -77,6 +77,7 @@ jobs:
               ollama pull $model
             fi
           done < ${{ env.MODEL_LIST_FILE }}
+          ollama list
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
