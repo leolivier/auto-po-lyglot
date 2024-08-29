@@ -77,6 +77,6 @@ class TestTranspo:
 """
           logger.vprint(trans_exp)
           outfile.write(f'{out} {trans_exp}')
-          # assert translation == tr['target_translation']
+          assert translation == tr['target_translation']
       outfile.close()
     extract_csv_translations(output_file, params)
