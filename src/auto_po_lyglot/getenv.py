@@ -56,7 +56,7 @@ the context translation."""
 
     self.verbose = args.verbose or bool(environ.get('VERBOSE', False))
     logger.set_verbose(self.verbose)
-      
+
     # original language
     self.original_language = args.original_language or environ.get('ORIGINAL_LANGUAGE', 'English')
     # context translation language
