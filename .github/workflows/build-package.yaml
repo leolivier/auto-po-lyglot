@@ -23,61 +23,86 @@ env:
 
 jobs:
 
-  setup-ollama:
+  ollama-job:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache Ollama
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.ollama
+            /usr/local/bin/ollama
+          key: ${{ runner.os }}-ollama-${{ hashFiles('**/ollama-version.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-ollama-
+
       - name: Install Ollama
         run: |
-          curl -fsSL https://ollama.ai/install.sh | sh
-          ollama --version
+          if [ ! -f /usr/local/bin/ollama ]; then
+            curl https://ollama.ai/install.sh | sh
+          fi
 
-      - name: Start Ollama service and pull the model
-        run: |
+      - name: Start Ollama and wait for it to serve
+        run: | 
           ollama serve &
-          ollama pull ${{ env.MODEL }}
+          sleep 10
 
-  build:
-    runs-on: ubuntu-latest
-    needs: setup-ollama
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-        cache: 'pip'
-    - name: Create Venv and Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade uv  # install python manager
-        uv sync  # create a virtual environment and install dependencies
-        source .venv/bin/activate  # activate the virtual environment
-        uv pip install -e .  # to allow dev package testing
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        uv run flake8 ./src ./tests --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        uv run flake8 ./src ./tests --count --exit-zero --max-complexity=10 --max-line-length=127 --indent-size 2 --statistics
-    - name: Make envfile
-      uses: SpicyPizza/create-envfile@v2.0.3
-      with:
-        envkey_VERBOSE: ${{ env.VERBOSE }} # optional
-        envkey_INPUT_PO: ${{ env.INPUT_PO }}
-        envkey_ORIGINAL_LANGUAGE: ${{ env.ORIGINAL_LANGUAGE }}
-        envkey_CONTEXT_LANGUAGE: ${{ env.CONTEXT_LANGUAGE }}
-        envkey_TARGET_LANGUAGES: ${{ env.TARGET_LANGUAGES }}
-        envkey_LLM_CLIENT: ${{ env.LLM_CLIENT }}
-        envkey_LLM_MODEL: ${{ env.MODEL }}
-        envkey_OLLAMA_BASE_URL: ${{ env.OLLAMA_BASE_URL }}
-        envkey_SYSTEM_PROMPT: ${{ vars.SYSTEM_PROMPT }}
-        envkey_USER_PROMPT: ${{ vars.USER_PROMPT }}
-        directory: .
-        file_name: .env
-        fail_on_empty: false
-        sort_keys: false
-    - name: Test with pytest
-      run: |
-        # [[ -f .env ]] && cat .env || echo "No .env file found in root"
-        # [[ -f tests/.env ]] && cat tests/.env || echo "No .env file found in tests"
-        uv run pytest -s ./tests
+      - name: Cache Ollama models
+        uses: actions/cache@v4
+        with:
+          path: ~/.ollama/models
+          key: ${{ runner.os }}-ollama-models-${{ hashFiles('**/model-list.txt') }}
+
+      - name: Pull Ollama model
+        run: |
+          if [ ! -f ~/.ollama/models/${{ env.MODEL }}.bin ]; then
+            ollama pull ${{ env.MODEL }}
+          fi
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Create Venv and Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade uv  # install python manager
+          uv sync  # create a virtual environment and install dependencies
+          source .venv/bin/activate  # activate the virtual environment
+          uv pip install -e .  # to allow dev package testing
+
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          uv run flake8 ./src ./tests --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          uv run flake8 ./src ./tests --count --exit-zero --max-complexity=10 --max-line-length=127 --indent-size 2 --statistics
+
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v2.0.3
+        with:
+          envkey_VERBOSE: ${{ env.VERBOSE }} # optional
+          envkey_INPUT_PO: ${{ env.INPUT_PO }}
+          envkey_ORIGINAL_LANGUAGE: ${{ env.ORIGINAL_LANGUAGE }}
+          envkey_CONTEXT_LANGUAGE: ${{ env.CONTEXT_LANGUAGE }}
+          envkey_TARGET_LANGUAGES: ${{ env.TARGET_LANGUAGES }}
+          envkey_LLM_CLIENT: ${{ env.LLM_CLIENT }}
+          envkey_LLM_MODEL: ${{ env.MODEL }}
+          envkey_OLLAMA_BASE_URL: ${{ env.OLLAMA_BASE_URL }}
+          envkey_SYSTEM_PROMPT: ${{ vars.SYSTEM_PROMPT }}
+          envkey_USER_PROMPT: ${{ vars.USER_PROMPT }}
+          directory: .
+          file_name: .env
+          fail_on_empty: false
+          sort_keys: false
+
+      - name: Test with pytest
+        run: |
+          # [[ -f .env ]] && cat .env || echo "No .env file found in root"
+          # [[ -f tests/.env ]] && cat tests/.env || echo "No .env file found in tests"
+          uv run pytest -s ./tests
