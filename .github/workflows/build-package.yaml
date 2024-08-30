@@ -35,12 +35,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Display file contents
+      - name: Display Ollama version
         run: |
           echo "Ollama version file content:"
           cat ${{ env.OLLAMA_VERSION_FILE }}
-          echo "Model list file content:"
-          cat ${{ env.MODEL_LIST_FILE }}
+          echo "Ollama version hash:"
+          echo ${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
 
       - name: Cache Ollama
         uses: actions/cache@v3
@@ -51,13 +51,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ollama-
 
-      - name: Check Ollama cache
+      - name: Debug Cache Ollama
         run: |
-          if [ -f ~/.ollama/bin/ollama ]; then
-            echo "Ollama cache hit"
-            ls -l ~/.ollama/bin/ollama
-          else
-            echo "Ollama cache miss"
+          echo "Cache hit: ${{ steps.cache-ollama.outputs.cache-hit }}"
+          if [ "${{ steps.cache-ollama.outputs.cache-hit }}" != 'true' ]; then
+            echo "Cache miss. This is normal if this is the first run or if the Ollama version has changed."
           fi
 
       - name: Install or Use Cached Ollama
@@ -85,13 +83,11 @@ jobs:
           path: ~/.ollama/models
           key: ${{ runner.os }}-ollama-models-${{ hashFiles(env.MODEL_LIST_FILE) }}
 
-      - name: Check models cache
+      - name: Debug Cache Models
         run: |
-          if [ -d ~/.ollama/models ]; then
-            echo "Models cache hit"
-            ls -l ~/.ollama/models
-          else
-            echo "Models cache miss"
+          echo "Models cache hit: ${{ steps.cache-models.outputs.cache-hit }}"
+          if [ "${{ steps.cache-models.outputs.cache-hit }}" != 'true' ]; then
+            echo "Models cache miss. This is normal if this is the first run or if the model list has changed."
           fi
 
       - name: Pull Ollama models
@@ -106,11 +102,9 @@ jobs:
           done < ${{ env.MODEL_LIST_FILE }}
           ollama list
 
-      - name: Debug cache
+      - name: Debug final state
         if: always()
         run: |
-          echo "Ollama cache restored: ${{ steps.cache-ollama.outputs.cache-hit }}"
-          echo "Models cache restored: ${{ steps.cache-models.outputs.cache-hit }}"
           echo "Ollama version:"
           ollama --version
           echo "Available models:"
