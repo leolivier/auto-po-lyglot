@@ -12,7 +12,7 @@ on:
 
 env:
   LLM_CLIENT: ollama
-  MODEL: phi3
+  MODEL: gemma2:2b
   VERBOSE: true # optional
   INPUT_PO: tests/input/input.po
   ORIGINAL_LANGUAGE: English
@@ -33,51 +33,90 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
+
+      - name: Display file contents
+        run: |
+          echo "Ollama version file content:"
+          cat ${{ env.OLLAMA_VERSION_FILE }}
+          echo "Model list file content:"
+          cat ${{ env.MODEL_LIST_FILE }}
 
       - name: Cache Ollama
-        uses: actions/cache@v4
+        uses: actions/cache@v3
+        id: cache-ollama
         with:
-          path: |
-            ~/.ollama
-            /usr/local/bin/ollama
+          path: ~/.ollama
           key: ${{ runner.os }}-ollama-${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
           restore-keys: |
             ${{ runner.os }}-ollama-
 
-      - name: Install Ollama
+      - name: Check Ollama cache
         run: |
-          if [ ! -f /usr/local/bin/ollama ]; then
-            curl https://ollama.ai/install.sh | sh
+          if [ -f ~/.ollama/bin/ollama ]; then
+            echo "Ollama cache hit"
+            ls -l ~/.ollama/bin/ollama
+          else
+            echo "Ollama cache miss"
           fi
-          # This can't work because we can't control the version of Ollama
-          # that is installed. So, just touch the OLLAMA_VERSION_FILE to force it to update
-          # INSTALLED_VERSION=$(ollama --version)
-          # DESIRED_VERSION=$(cat ${{ env.OLLAMA_VERSION_FILE }})
-          # if [ "$INSTALLED_VERSION" != "$DESIRED_VERSION" ]; then
-          #   echo "Updating Ollama to version $DESIRED_VERSION"
-          #   curl https://ollama.ai/install.sh | sh
-          # fi
+
+      - name: Install or Use Cached Ollama
+        run: |
+          if [ ! -f ~/.ollama/bin/ollama ]; then
+            echo "Installing Ollama"
+            curl https://ollama.ai/install.sh | sh
+            mkdir -p ~/.ollama/bin
+            cp /usr/local/bin/ollama ~/.ollama/bin/ollama
+          else
+            echo "Using cached Ollama"
+          fi
+          sudo ln -sf ~/.ollama/bin/ollama /usr/local/bin/ollama
+          ollama --version
 
       - name: Start Ollama and wait for it to serve
-        run: | 
+        run: |
           ollama serve &
           sleep 10
 
       - name: Cache Ollama models
-        uses: actions/cache@v4
+        uses: actions/cache@v3
+        id: cache-models
         with:
           path: ~/.ollama/models
           key: ${{ runner.os }}-ollama-models-${{ hashFiles(env.MODEL_LIST_FILE) }}
 
-      - name: Pull Ollama model
+      - name: Check models cache
+        run: |
+          if [ -d ~/.ollama/models ]; then
+            echo "Models cache hit"
+            ls -l ~/.ollama/models
+          else
+            echo "Models cache miss"
+          fi
+
+      - name: Pull Ollama models
         run: |
           while IFS= read -r model || [[ -n "$model" ]]; do
             if [ ! -f ~/.ollama/models/${model}.bin ]; then
+              echo "Pulling model: $model"
               ollama pull $model
+            else
+              echo "Model already cached: $model"
             fi
           done < ${{ env.MODEL_LIST_FILE }}
           ollama list
+
+      - name: Debug cache
+        if: always()
+        run: |
+          echo "Ollama cache restored: ${{ steps.cache-ollama.outputs.cache-hit }}"
+          echo "Models cache restored: ${{ steps.cache-models.outputs.cache-hit }}"
+          echo "Ollama version:"
+          ollama --version
+          echo "Available models:"
+          ollama list
+          echo "Ollama directory content:"
+          ls -R ~/.ollama
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
