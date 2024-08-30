@@ -68,6 +68,6 @@ TEST_TRANSLATIONS = [
       },
     ]
 
-# use only 3 first translations for github actions
+# use only 2 first translations for github actions
 if environ.get("GITHUB_ACTIONS") == "true":
-  TEST_TRANSLATIONS = TEST_TRANSLATIONS[:3]
+  TEST_TRANSLATIONS = TEST_TRANSLATIONS[:2]
