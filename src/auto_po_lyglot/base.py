@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import logging
 from os import environ
 import sys
+from .examples import po_placeholder_examples, basic_examples, ambiguous_examples
 
 
 class TranspoException(Exception):
@@ -41,14 +42,66 @@ class TranspoClient(ABC):
       print("SYSTEM_PROMPT environment variable not set")
       sys.exit(1)
     logger.debug("system prompt format: ", format)
-    prompt_params = {
-      "original_language": self.params.original_language,
-      "context_language": self.params.context_language,
-      "target_language": self.target_language,
-    }
+    try:
+      basic_exemple = basic_examples[0]
+      assert self.params.original_language in basic_exemple
+      assert self.params.context_language in basic_exemple
+      assert self.target_language in basic_exemple
+      simple_original_phrase = basic_exemple[self.params.original_language]
+      simple_context_translation = basic_exemple[self.params.context_language]
+      simple_target_translation = basic_exemple[self.target_language]
+      for ambiguous_example in ambiguous_examples:
+        if ambiguous_example['original_language'] == self.params.original_language and \
+           ambiguous_example['context_language'] == self.params.context_language:
+          assert self.params.original_language in ambiguous_example
+          assert self.params.context_language in ambiguous_example
+          assert self.target_language in ambiguous_example
+          ambiguous_original_phrase = ambiguous_example[self.params.original_language]
+          ambiguous_context_translation = ambiguous_example[self.params.context_language]
+          ambiguous_target_translation = ambiguous_example[self.target_language]
+          ambiguous_explanation = ambiguous_example['explanation']
+          ambiguous_target_translation = ambiguous_example[self.target_language]
+          break
+      if ambiguous_original_phrase is None:
+        raise TranspoException("ambiguous_examples.py does not contain an ambiguous example for these languages")
+
+      # PO placeholders
+      assert len(po_placeholder_examples) == 3
+      for po_placeholder_example in po_placeholder_examples:
+        assert self.params.original_language in po_placeholder_example
+        assert self.params.context_language in po_placeholder_example
+        assert self.target_language in po_placeholder_example
+
+      prompt_params = {
+        "original_language": self.params.original_language,
+        "context_language": self.params.context_language,
+        "target_language": self.target_language,
+        "simple_original_phrase": simple_original_phrase,
+        "simple_context_translation": simple_context_translation,
+        "simple_target_translation": simple_target_translation,
+        "ambiguous_original_phrase": ambiguous_original_phrase,
+        "ambiguous_context_translation": ambiguous_context_translation,
+        "ambiguous_target_translation": ambiguous_target_translation,
+        "po_placeholder_original_phrase_1": po_placeholder_examples[0][self.params.original_language],
+        "po_placeholder_context_translation_1": po_placeholder_examples[0][self.params.context_language],
+        "po_placeholder_target_translation_1": po_placeholder_examples[0][self.target_language],
+        "po_placeholder_original_phrase_2": po_placeholder_examples[1][self.params.original_language],
+        "po_placeholder_context_translation_2": po_placeholder_examples[1][self.params.context_language],
+        "po_placeholder_target_translation_2": po_placeholder_examples[1][self.target_language],
+        "po_placeholder_original_phrase_3": po_placeholder_examples[2][self.params.original_language],
+        "po_placeholder_context_translation_3": po_placeholder_examples[2][self.params.context_language],
+        "po_placeholder_target_translation_3": po_placeholder_examples[2][self.target_language],
+      }
+    except KeyError as e:
+      raise TranspoException(f"examples.py does not contain an example for these piece: {str(e)}")
+
+    # first format the explanation then add it to the params before formatting the prompt
+    explanation_params = prompt_params.copy()
+    explanation_params["target_translation"] = ambiguous_target_translation
+    prompt_params["ambiguous_explanation"] = ambiguous_explanation.format(**explanation_params)
     system_prompt = format.format(**prompt_params)
     if self.first:
-      logger.info("system prompt:\n", system_prompt)
+      logger.vprint("First system prompt:\n", system_prompt)
       self.first = False
     else:
       logger.debug("system prompt:\n", system_prompt)
@@ -70,7 +123,7 @@ class TranspoClient(ABC):
   def process_translation(self, raw_result):
     translation_result = raw_result.split('\n')
     translation = translation_result[0].strip(' "')
-    explanation = 'Not provided'
+    explanation = None
     if len(translation_result) > 1:
       translation_result.pop(0)
       translation_result = [line for line in translation_result if line]
