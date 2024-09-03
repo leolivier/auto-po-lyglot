@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import logging
 from dotenv import load_dotenv
 from os import environ
 import argparse
@@ -54,6 +55,8 @@ the context translation."""
 
     load_dotenv(override=True)
 
+    self.log_level = environ.get('LOG_LEVEL', 'WARNING')
+    logging.set_levelbasicConfig(self.log_level)
     self.verbose = args.verbose or bool(environ.get('VERBOSE', False))
     logger.set_verbose(self.verbose)
 
