@@ -81,6 +81,12 @@ jobs:
         user: __token__
         password: ${{ secrets.TEST_PYPI_SECRET_TOKEN }}
 
+    - name: Test with pytest (only for testing, to be removed and tested with Ollama if connection error)
+      run: |
+        pip install -i https://test.pypi.org/simple/ auto-po-lyglot
+        pip list | grep auto-po-lyglot
+        pytest -s ./tests
+
     - name: Display Ollama version
       run: |
         echo "Ollama version file content:"
@@ -160,4 +166,6 @@ jobs:
 
     - name: Test with pytest
       run: |
+        pip install -i https://test.pypi.org/simple/ auto-po-lyglot
+        pip list | grep auto-po-lyglot
         pytest -s ./tests
