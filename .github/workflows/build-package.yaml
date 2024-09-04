@@ -121,17 +121,14 @@ jobs:
       - name: Create Venv and Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --upgrade uv  # install python manager
-          uv sync  # create a virtual environment and install dependencies
-          source .venv/bin/activate  # activate the virtual environment
-          uv pip install -e .  # to allow dev package testing
+          pip install -e .  # to allow dev package testing
 
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
-          uv run flake8 ./src ./tests --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 ./src ./tests --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          uv run flake8 ./src ./tests --count --exit-zero --max-complexity=10 --max-line-length=127 --indent-size 2 --statistics
+          flake8 ./src ./tests --count --exit-zero --max-complexity=10 --max-line-length=127 --indent-size 2 --statistics
 
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v2.0.3
@@ -155,4 +152,4 @@ jobs:
         run: |
           # [[ -f .env ]] && cat .env || echo "No .env file found in root"
           # [[ -f tests/.env ]] && cat tests/.env || echo "No .env file found in tests"
-          uv run pytest -s ./tests
+          pytest -s ./tests
