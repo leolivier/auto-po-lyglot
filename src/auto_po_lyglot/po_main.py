@@ -1,12 +1,15 @@
 #!/usr/bin/env python
-from time import sleep
-from .getenv import TranspoParams
-from pathlib import Path
-import polib
-from .base import Logger
-import langcodes
 
-logger = Logger(__name__)
+import langcodes
+import logging
+import polib
+from pathlib import Path
+from time import sleep
+
+from .getenv import ParamsLoader
+from .default_prompts import system_prompt, user_prompt
+
+logger = logging.getLogger(__name__)
 
 
 def get_language_code(language_name):
@@ -45,9 +48,9 @@ def get_outfile_name(model_name, input_po, target_language, context_language):
       model_name = model_name.replace(':', '-')
       outfile = p.with_suffix(f'.{model_name}.{target_code}.po')
 
-    logger.vprint("Output file:", outfile)
+    logger.info("Output file: {outfile}")
     if outfile.exists():
-      logger.vprint("Output file already exists, won't overwrite.")
+      logger.info("Output file already exists, won't overwrite.")
       i = 0
       i_outfile = outfile
       # append a number to the filename
@@ -55,7 +58,7 @@ def get_outfile_name(model_name, input_po, target_language, context_language):
         i_outfile = outfile.with_suffix(f'.{i}.po')
         i += 1
       outfile = i_outfile
-      logger.vprint("Output file:", outfile)
+      logger.info("Corrected output file: {outfile}")
 
     return outfile
 
@@ -76,25 +79,20 @@ def main():
         None
     """
 
-    additional_args = [
-      {
-         'arg': '--input_po',
-         'env': 'INPUT_PO',
-         'type': str,
-         'help': 'the .po file containing the msgids (phrases to be translated) and msgstrs (context translations)',
-         'default': 'tests/input/input.po'
-      },
-    ]
+    params = ParamsLoader()
 
-    params = TranspoParams(additional_args)
+    if params.show_prompts:
+        print(f">>>>>>>>>>System prompt:\n{system_prompt}\n\n>>>>>>>>>>>>User prompt:\n{user_prompt}")
+        exit(0)
 
     client = params.get_client()
 
-    logger.vprint(f"Using model {client.params.model} to translate {params.input_po} from {params.original_language} -> "
-                  f"{params.context_language} -> {params.test_target_languages} with an {params.llm_client} client")
+    logger.info(f"Using model {client.params.model} to translate {params.input_po} from {params.original_language} -> "
+                f"{params.context_language} -> {params.test_target_languages} with an {params.llm_client} client")
     for target_language in params.test_target_languages:
       client.target_language = target_language
-      output_file = get_outfile_name(client.params.model, params.input_po, target_language, params.context_language)
+      output_file = params.output_po or get_outfile_name(client.params.model, params.input_po,
+                                                         target_language, params.context_language)
       # Load input .po file
       po = polib.pofile(params.input_po)
       try:
@@ -108,7 +106,7 @@ def main():
               entry.comment = explanation
             # Update translation
             entry.msgstr = translation
-            logger.vprint(f"""==================
+            logger.info(f"""==================
   {params.original_language}: "{original_phrase}"
   {params.context_language}: "{context_translation}"
   {target_language}: "{translation}"
@@ -116,7 +114,7 @@ def main():
   """)
             sleep(1.0)  # Sleep for 1 second to avoid rate limiting
       except Exception as e:
-        logger.vprint(f"Error: {e}")
+        logger.info(f"Error: {e}, trying next translation")
       # Save the new .po file even if there was an error to not lose what was translated
       po.save(output_file)
 
