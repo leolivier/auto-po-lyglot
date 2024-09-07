@@ -1,8 +1,9 @@
 from time import sleep
 from anthropic import Anthropic
-from .base import TranspoClient, TranspoException, Logger
+from .base import TranspoClient, TranspoException
+import logging
 
-logger = Logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class ClaudeClient(TranspoClient):
@@ -60,13 +61,13 @@ class CachedClaudeClient(ClaudeClient):
         )
         if self.first:
           self.first = False
-          logger.vprint("claude cached usage", response.usage)
+          logger.info(f"claude cached usage: {response.usage}")
         else:
-          logger.info("claude cached usage", response.usage)
+          logger.debug(f"claude cached usage: {response.usage}")
         return response.content[0].text
       except Exception as e:
         if "overloaded_error" in str(e):
-          logger.vprint(f"claude cached overloaded error, next retry in {next_retry_in} seconds")
+          logger.info(f"claude cached overloaded error, next retry in {next_retry_in} seconds")
           next_retry_in = 2 ** retries
           if next_retry_in > 60:  # should never happen with max_retries = 5
             next_retry_in = 60

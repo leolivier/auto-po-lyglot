@@ -4,9 +4,9 @@ import re
 import csv
 import sys
 import os
-from .base import Logger
+import logging
 
-logger = Logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def extract_translation(line):
@@ -17,7 +17,7 @@ def extract_translation(line):
     return res
 
 
-def process_file(input_file, output_file, languages=["English", "French", "Italian", "Spanish", "German"]):
+def extract_csv(input_file, output_file, languages=["English", "French", "Italian", "Spanish", "German"]):
     translations = {}
     current_key = None
 
@@ -58,8 +58,8 @@ def main():
         print(f"Error: Input file '{input_file}' does not exist.")
         sys.exit(1)
 
-    process_file(input_file, output_file)
-    logger.vprint(f"Conversion complete. CSV file created : {output_file}")
+    extract_csv(input_file, output_file)
+    logger.info(f"Conversion complete. CSV file created : {output_file}")
 
 
 if __name__ == "__main__":
