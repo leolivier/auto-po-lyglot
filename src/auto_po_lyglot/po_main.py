@@ -116,7 +116,7 @@ def main():
   """)
             sleep(1.0)  # Sleep for 1 second to avoid rate limiting
       except Exception as e:
-        logger.info(f"Error: {e}, trying next translation")
+        logger.info(f"Error: {e}")
       # Save the new .po file even if there was an error to not lose what was translated
       po.save(output_file)
 
