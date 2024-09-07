@@ -136,7 +136,12 @@ the context translation."""
       self.test_target_languages = environ.get('TARGET_LANGUAGES', 'Spanish').split(',')
 
     self.system_prompt = environ.get('SYSTEM_PROMPT', None)
+    if self.system_prompt:
+      logger.debug(f"SYSTEM_PROMPT environment variable is set to '{self.system_prompt}'")
+
     self.user_prompt = environ.get('USER_PROMPT', None)
+    if self.user_prompt:
+      logger.debug(f"USER_PROMPT environment variable is set to '{self.user_prompt}'")
 
     self.input_po = args.input_po or environ.get('INPUT_PO', None)
     self.output_po = args.output_po or environ.get('OUTPUT_PO', None)
