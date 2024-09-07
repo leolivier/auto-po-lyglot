@@ -65,7 +65,7 @@ would be translated in {target_language} into:
 ```
 \"{po_placeholder_target_translation_3}\"
 ```
-"""
+"""  # noqa
 
 user_prompt = "{original_language} sentence: \"{original_phrase}\", {context_language} translation: \"{context_translation}\""
 
