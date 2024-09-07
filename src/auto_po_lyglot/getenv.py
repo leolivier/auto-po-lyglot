@@ -3,8 +3,42 @@ import logging
 from dotenv import load_dotenv
 from os import environ
 import argparse
+import sys
 
 logger = logging.getLogger(__name__)
+
+
+def set_all_loggers_level(level):
+    logger.info(f"Setting all loggers to level {logging.getLevelName(level)}")
+
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setLevel(level)
+    formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+
+    for name in logging.root.manager.loggerDict:
+      if not name.startswith('auto_po_lyglot.'):
+        continue
+      nlogger = logging.getLogger(name)
+      nlogger.handlers = []
+      nlogger.addHandler(handler)
+      nlogger.setLevel(level)
+      nlogger.propagate = False
+
+    root = logging.getLogger()
+    root.handlers = []
+    root.addHandler(handler)
+    root.setLevel(level)
+
+
+# def inspect_logger(logger):
+#     print(f"Logger: {logger.name}")
+#     print(f"  Level: {logging.getLevelName(logger.level)}")
+#     print(f"  Propagate: {logger.propagate}")
+#     print("  Handlers:")
+#     for idx, handler in enumerate(logger.handlers):
+#         print(f"    Handler {idx}: {type(handler).__name__}")
+#         print(f"      Level: {logging.getLevelName(handler.level)}")
 
 
 class ParamsLoader:
@@ -51,7 +85,7 @@ the context translation."""
                              '.../locale/<target language code>/LC_MESSAGES/<input po file name>.')
 
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode')
-    parser.add_argument('-vv', '--debug', action='store_true', help='verbose mode')
+    parser.add_argument('-vv', '--debug', action='store_true', help='debug mode')
     if additional_args:
       for arg in additional_args:
         if arg.get('action'):
@@ -68,9 +102,11 @@ the context translation."""
 
     args = self.parse_args(additional_args)
 
-    if args.show_prompts: 
+    if args.show_prompts:
       self.show_prompts = True
       return  # will exit just after showing prompts, no need to continue
+    else:
+      self.show_prompts = False
 
     load_dotenv(override=True)
 
@@ -80,7 +116,7 @@ the context translation."""
       self.log_level = logging.INFO
     else:
       self.log_level = logging.WARNING
-    logging.getLogger().setLevel(self.log_level)
+    set_all_loggers_level(self.log_level)
 
     # original language
     self.original_language = args.original_language or environ.get('ORIGINAL_LANGUAGE', 'English')
@@ -113,6 +149,8 @@ the context translation."""
           arg = arg[1:]
         val = getattr(args, arg) or environ.get(argument.get('env'), argument.get('default', None))
         setattr(self, arg, val)
+
+    logger.debug(f"Params: {self.__dict__}")
 
   def get_client(self):
     if not self._client:
