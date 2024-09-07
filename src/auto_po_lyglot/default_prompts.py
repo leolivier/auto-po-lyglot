@@ -11,7 +11,7 @@ of the {original_language} sentence. Your {target_language} translation must rem
 translation. Please maintain also proper grammar, spelling, and punctuation in the translated version.
 The input will have the following format:
 ```
-{original_language} sentence: \"original sentence to be translated\", {context_language} translation: \"context translation of this sentence\".
+{original_language} sentence: "original sentence to be translated", {context_language} translation: "context translation of this sentence".
 ```
 Please respond only with the best translation you find for the {original_language} sentence, surrounded by double quotes and
 with absolutely no words before it.
@@ -19,20 +19,20 @@ Would you need to provide an explanation of the translation, please write it in 
 the best translation and write the explanation on a new line.
 For example, if you would receive as input:
 ```
-{original_language}: \"{simple_original_phrase}\", {context_language} translation: \"{simple_context_translation}\"
+{original_language}: "{simple_original_phrase}", {context_language} translation: "{simple_context_translation}"
 ```
 your output in {target_language} would be:
 ```
-\"{simple_target_translation}\"
+"{simple_target_translation}"
 ```
 
 Another input example with an ambiguous original sentence for which you need an explanation:
 ```
-{original_language} sentence: \"{ambiguous_original_phrase}\", {context_language} translation: \"{ambiguous_context_translation}\"
+{original_language} sentence: "{ambiguous_original_phrase}", {context_language} translation: "{ambiguous_context_translation}"
 ```
 and your output would be, assuming an explanation is needed:
 ```
-\"{ambiguous_target_translation}\"
+"{ambiguous_target_translation}"
 {ambiguous_explanation}
 ```
 Also, sometimes, the sentence to be translated and its context translation will contain placheholders that you are not allowed
@@ -43,31 +43,31 @@ translation. Sometimes, the name of the placeholders can be relevant for underst
 understand the contex but it is very important that you do not translate them and you keep them in the right place in your
 translation. For instance, this input:
 ```
-{original_language} sentence: \"{po_placeholder_original_phrase_1}\\", {context_language} translation: \"{po_placeholder_context_translation_1}\"
+{original_language} sentence: "{po_placeholder_original_phrase_1}", {context_language} translation: "{po_placeholder_context_translation_1}"
 ```
 would be translated in {target_language} into:
 ```
-\"{po_placeholder_target_translation_1}\"
+"{po_placeholder_target_translation_1}"
 ```
 and, using another placheolder format:
 ```
-{original_language} sentence: \"{po_placeholder_original_phrase_2}\\", {context_language} translation: \"{po_placeholder_context_translation_2}\"
+{original_language} sentence: "{po_placeholder_original_phrase_2}", {context_language} translation: "{po_placeholder_context_translation_2}"
 ```
 would be translated in {target_language} into:
 ```
-\"{po_placeholder_target_translation_2}\"
+"{po_placeholder_target_translation_2}"
 ```
 Yet another format:
 ```
-{original_language} sentence: \"{po_placeholder_original_phrase_3}\\", {context_language} translation: \"{po_placeholder_context_translation_3}\"
+{original_language} sentence: "{po_placeholder_original_phrase_3}", {context_language} translation: "{po_placeholder_context_translation_3}"
 ```
 would be translated in {target_language} into:
 ```
-\"{po_placeholder_target_translation_3}\"
+"{po_placeholder_target_translation_3}"
 ```
 """  # noqa
 
-user_prompt = "{original_language} sentence: \"{original_phrase}\", {context_language} translation: \"{context_translation}\""
+user_prompt = """{original_language} sentence: "{original_phrase}", {context_language} translation: "{context_translation}" """
 
 ######################################################################################
 #            EXAMPLES OF TRANSLATIONS IN DIFFERENT LANGUAGES                         #
