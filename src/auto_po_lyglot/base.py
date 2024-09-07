@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 import logging
 from os import environ
-import sys
-from .examples import po_placeholder_examples, basic_examples, ambiguous_examples
+from .default_prompt import system_prompt, user_prompt, po_placeholder_examples, basic_examples, ambiguous_examples
+
+logger = logging.getLogger(__name__)
 
 
 class TranspoException(Exception):
@@ -15,7 +16,7 @@ class TranspoClient(ABC):
     # target language can be set later but before any translation.
     # it can also be changed by the user at any time, the prompt will be updated automatically
     self.target_language = target_language
-    logger.info(f"TranspoClient using model {self.params.model}")
+    logger.debug(f"TranspoClient using model {self.params.model}")
     self.first = True
 
   @abstractmethod
@@ -35,12 +36,7 @@ class TranspoClient(ABC):
     ...
 
   def get_system_prompt(self):
-    format = self.params.system_prompt if hasattr(self.params, 'system_prompt') else None
-    if format is None:
-      print(self.params.__dict__)
-      # raise TranspoException("SYSTEM_PROMPT environment variable not set")
-      print("SYSTEM_PROMPT environment variable not set")
-      sys.exit(1)
+    format = self.params.system_prompt if hasattr(self.params, 'system_prompt') else system_prompt
     logger.debug("system prompt format: ", format)
     try:
       basic_exemple = basic_examples[0]
@@ -101,14 +97,14 @@ class TranspoClient(ABC):
     prompt_params["ambiguous_explanation"] = ambiguous_explanation.format(**explanation_params)
     system_prompt = format.format(**prompt_params)
     if self.first:
-      logger.vprint("First system prompt:\n", system_prompt)
+      logger.info(f"First system prompt:\n{system_prompt}")
       self.first = False
     else:
-      logger.debug("system prompt:\n", system_prompt)
+      logger.debug(f"System prompt:\n{system_prompt}")
     return system_prompt
 
   def get_user_prompt(self, phrase, context_translation):
-    format = environ.get("USER_PROMPT", None)
+    format = environ.get("USER_PROMPT", None) or user_prompt
     if format is None:
       raise TranspoException("USER_PROMPT environment variable not set")
     params = {
@@ -138,69 +134,3 @@ class TranspoClient(ABC):
       user_prompt = self.get_user_prompt(phrase, context_translation)
       raw_result = self.get_translation(system_prompt, user_prompt)
       return self.process_translation(raw_result)
-
-
-class Logger():
-  verbose_mode = False
-
-  def __init__(self, name):
-    self.logger = logging.getLogger(name)
-
-  def vprint(self, *args, **kwargs):
-    """Print only if verbose is set"""
-    if self.verbose_mode:
-      print(*args, **kwargs)
-      sys.stdout.flush()
-
-  def info(self, *args, **kwargs):
-    self.logger.info(*args, **kwargs)
-
-  def debug(self, *args, **kwargs):
-    self.logger.debug(*args, **kwargs)
-
-  def error(self, *args, **kwargs):
-    self.logger.error(*args, **kwargs)
-
-  def warning(self, *args, **kwargs):
-    self.logger.warning(*args, **kwargs)
-
-  def critical(self, *args, **kwargs):
-    self.logger.critical(*args, **kwargs)
-
-  def exception(self, *args, **kwargs):
-    self.logger.exception(*args, **kwargs)
-
-  @classmethod
-  def set_verbose(cls, verbose):
-    cls.verbose_mode = verbose
-
-  def set_level(self, level):
-    self.logger.setLevel(level)
-
-  def get_level(self):
-    return self.logger.getEffectiveLevel()
-
-  def set_format(self, format):
-    self.logger.handlers[0].setFormatter(logging.Formatter(format))
-
-  def get_format(self):
-    return self.logger.handlers[0].formatter
-
-  def set_file(self, filename):
-    self.logger.addHandler(logging.FileHandler(filename))
-
-  def get_file(self):
-    return self.logger.handlers[0]
-
-  def remove_file(self):
-    self.logger.removeHandler(self.logger.handlers[0])
-
-  def remove_console(self):
-    self.logger.removeHandler(self.logger.handlers[1])
-
-  def remove_all(self):
-    self.logger.removeHandler(self.logger.handlers[0])
-    self.logger.removeHandler(self.logger.handlers[1])
-
-
-logger = Logger(__name__)
