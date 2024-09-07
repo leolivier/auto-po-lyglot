@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import logging
 from os import environ
-from .default_prompt import system_prompt, user_prompt, po_placeholder_examples, basic_examples, ambiguous_examples
+from .default_prompts import system_prompt, user_prompt, po_placeholder_examples, basic_examples, ambiguous_examples
 
 logger = logging.getLogger(__name__)
 
