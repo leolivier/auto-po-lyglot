@@ -48,7 +48,7 @@ def get_outfile_name(model_name, input_po, target_language, context_language):
       model_name = model_name.replace(':', '-')
       outfile = p.with_suffix(f'.{model_name}.{target_code}.po')
 
-    logger.info("Output file: {outfile}")
+    logger.info(f"Output file: {outfile}")
     if outfile.exists():
       logger.info("Output file already exists, won't overwrite.")
       i = 0
@@ -58,7 +58,7 @@ def get_outfile_name(model_name, input_po, target_language, context_language):
         i_outfile = outfile.with_suffix(f'.{i}.po')
         i += 1
       outfile = i_outfile
-      logger.info("Corrected output file: {outfile}")
+      logger.info(f"Corrected output file: {outfile}")
 
     return outfile
 
@@ -94,6 +94,8 @@ def main():
       output_file = params.output_po or get_outfile_name(client.params.model, params.input_po,
                                                          target_language, params.context_language)
       # Load input .po file
+      assert params.input_po, "Input .po file not provided"
+      assert Path(params.input_po).exists(), f"Input .po file {params.input_po} does not exist"
       po = polib.pofile(params.input_po)
       try:
         for entry in po:
