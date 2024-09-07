@@ -3,12 +3,11 @@ import logging
 from dotenv import load_dotenv
 from os import environ
 import argparse
-from .base import Logger
 
-logger = Logger(__name__)
+logger = logging.getLogger(__name__)
 
 
-class TranspoParams:
+class ParamsLoader:
   description = """
 Creates a .po translation file based on an existing one using a given model and llm type.
 It reads the parameters from the command line and completes them if necessary from the .env in the same directory.
@@ -19,11 +18,14 @@ the context translation."""
   def parse_args(self, additional_args=None):
     parser = argparse.ArgumentParser(description=self.description)
     # Add arguments
-    parser.add_argument('--llm',
+    parser.add_argument('-p', '--show_prompts',
+                        action='store_true',
+                        help='show the prompts used for translations and exits')
+    parser.add_argument('-l', '--llm',
                         type=str,
                         help='Le type of LLM you want to use. Can be openai, ollama, claude or claude_cached. '
                              'For openai or claude[_cached], you need to set the api key in the environment')
-    parser.add_argument('--model',
+    parser.add_argument('-m', '--model',
                         type=str,
                         help='the name of the model to use. If not provided, a default model '
                              'will be used, based on the chosen client')
@@ -36,7 +38,20 @@ the context translation."""
     parser.add_argument('--target_language',
                         type=str,
                         help='the language into which the original phrase will be translated')
-    parser.add_argument('--verbose', action='store_true', help='verbose mode')
+    parser.add_argument('-i', '--input_po',
+                        type=str,
+                        help='the .po file containing the msgids (phrases to be translated) '
+                              'and msgstrs (context translations)')
+    parser.add_argument('-o', '--output_po',
+                        type=str,
+                        help='the .po file where the translated results will be written. If not provided, '
+                             'it will be created in the same directory as the input_po except if the input po file has '
+                             'the specific format .../locale/<context language code>/LC_MESSAGES/<input po file name>. '
+                             'In this case, the output po file will be created as '
+                             '.../locale/<target language code>/LC_MESSAGES/<input po file name>.')
+
+    parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode')
+    parser.add_argument('-vv', '--debug', action='store_true', help='verbose mode')
     if additional_args:
       for arg in additional_args:
         if arg.get('action'):
@@ -53,12 +68,19 @@ the context translation."""
 
     args = self.parse_args(additional_args)
 
+    if args.show_prompts: 
+      self.show_prompts = True
+      return  # will exit just after showing prompts, no need to continue
+
     load_dotenv(override=True)
 
-    self.log_level = environ.get('LOG_LEVEL', 'WARNING')
-    logging.set_levelbasicConfig(self.log_level)
-    self.verbose = args.verbose or bool(environ.get('VERBOSE', False))
-    logger.set_verbose(self.verbose)
+    if args.debug or (not args.verbose and environ.get('LOG_LEVEL', None) == 'DEBUG'):
+      self.log_level = logging.DEBUG
+    elif args.verbose or environ.get('LOG_LEVEL', None) == 'INFO':
+      self.log_level = logging.INFO
+    else:
+      self.log_level = logging.WARNING
+    logging.getLogger().setLevel(self.log_level)
 
     # original language
     self.original_language = args.original_language or environ.get('ORIGINAL_LANGUAGE', 'English')
@@ -79,6 +101,9 @@ the context translation."""
 
     self.system_prompt = environ.get('SYSTEM_PROMPT', None)
     self.user_prompt = environ.get('USER_PROMPT', None)
+
+    self.input_po = args.input_po or environ.get('INPUT_PO', None)
+    self.output_po = args.output_po or environ.get('OUTPUT_PO', None)
 
     # generic processing of additional arguments
     if additional_args:
