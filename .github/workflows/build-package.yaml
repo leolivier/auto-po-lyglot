@@ -13,7 +13,7 @@ on:
 env:
   LLM_CLIENT: ollama
   MODEL: gemma2:2b
-  LOG_LEVEL: INFO # optional
+  LOG_LEVEL: INFO
   INPUT_PO: tests/input/input.po
   ORIGINAL_LANGUAGE: English
   CONTEXT_LANGUAGE: French
@@ -56,7 +56,7 @@ jobs:
     - name: Make envfile
       uses: SpicyPizza/create-envfile@v2.0.3
       with:
-        envkey_LOG_LEVEL: ${{ env.LOG_LEVEL }} # optional
+        envkey_LOG_LEVEL: ${{ env.LOG_LEVEL }}
         envkey_INPUT_PO: ${{ env.INPUT_PO }}
         envkey_ORIGINAL_LANGUAGE: ${{ env.ORIGINAL_LANGUAGE }}
         envkey_CONTEXT_LANGUAGE: ${{ env.CONTEXT_LANGUAGE }}
@@ -64,8 +64,6 @@ jobs:
         envkey_LLM_CLIENT: ${{ env.LLM_CLIENT }}
         envkey_LLM_MODEL: ${{ env.MODEL }}
         envkey_OLLAMA_BASE_URL: ${{ env.OLLAMA_BASE_URL }}
-        envkey_SYSTEM_PROMPT: ${{ vars.SYSTEM_PROMPT }}
-        envkey_USER_PROMPT: ${{ vars.USER_PROMPT }}
         directory: .
         file_name: .env
         fail_on_empty: false
@@ -151,4 +149,6 @@ jobs:
     - name: Test with pytest
       run: |
         pip install .
+        echo "Running pytest with .env file:"
+        cat .env
         pytest -s ./tests
