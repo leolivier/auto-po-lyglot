@@ -82,8 +82,6 @@ jobs:
       with:
         path: /usr/local/bin/ollama
         key: ${{ runner.os }}-ollama-${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
-        restore-keys: |
-          ${{ runner.os }}-ollama-
 
     - name: Install Ollama (not cached)
       if : steps.cache-ollama.outputs.cache-hit != 'true'
