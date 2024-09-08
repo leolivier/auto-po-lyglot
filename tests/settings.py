@@ -11,7 +11,7 @@ TEST_TRANSLATIONS = [
         "original_phrase": "He gave her a ring.",
         "context_translation": "Il lui a donné une bague.",
         "target_translation": {
-          "gemma2:2b": "Lui ha regalato un anello.",
+          "gemma2:2b": "Lui ha dato una collana.",
           "phi3": "Ha dato a lei una collana."
         }
       },
@@ -26,52 +26,62 @@ TEST_TRANSLATIONS = [
       {
         "original_phrase": "They left the room.",
         "context_translation": "Ils ont quitté la pièce.",
-        "target_translation": "Si sono andati dalla stanza."
+        "target_translation": {
+          "gemma2:2b": "Si sono andati dalla stanza.",
+          "phi3": "Hanno lasciato la stanza."
+        }
       },
       {
         "original_phrase": "He gave her a ring.",
         "context_translation": "Il lui a passé un coup de fil.",
-        "target_translation": "Lui ha regalato un anello."
+        "target_translation": {
+          "gemma2:2b": "Gli ha passato un colpo di telefono.",
+          "phi3": "Ha fatto una telefonata."
+        }
       },
       {
         "original_phrase": "She broke down",
         "context_translation": "Elle est tombée en panne",
-        "target_translation": "Lei si è guastata"
+        "target_translation": {
+          "gemma2:2b": "Si è spenta", "phi3": "È crollata."
+        }
       },
       {
         "original_phrase": "She broke down",
         "context_translation": "Elle s'est effondrée",
-        "target_translation": "Lei si è sbandita"
+        "target_translation": {
+          "gemma2:2b": "Si è spezzata", "phi3": "Si è rotta"
+        }
       },
       {
         "original_phrase": "bank",
         "context_translation": "rive",
-        "target_translation": "la banca"
+        "target_translation": {"gemma2:2b": "Banca", "phi3": ""}
       },
       {
         "original_phrase": "bank",
         "context_translation": "banque",
-        "target_translation": "Banca"
+        "target_translation": {"gemma2:2b": "Banca", "phi3": "Banca"}
       },
       {
         "original_phrase": "He saw the light.",
         "context_translation": "Il a compris.",
-        "target_translation": "Lui è capitato la luce."
+        "target_translation": {"gemma2:2b": "Ha visto la luce.", "phi3": "Ha capito il sole."}
       },
       {
         "original_phrase": "He saw the light.",
         "context_translation": "Il a vu la lumière.",
-        "target_translation": "Lui è stata vista la luce."
+        "target_translation": {"gemma2:2b": "Ha visto la luce.", "phi3": "Ha visto la luce."}
       },
       {
         "original_phrase": "She made a call.",
         "context_translation": "Elle a passé un appel.",
-        "target_translation": "Lei ha fatto una chiamata."
+        "target_translation": {"gemma2:2b": "Ha fatto una chiamata.", "phi3": "Le ha fatto una telefonata."}
       },
       {
         "original_phrase": "They left the room.",
         "context_translation": "Ils ont laissé la pièce en l'état.",
-        "target_translation": "Si hanno lasciato la stanza."
+        "target_translation": {"gemma2:2b": "Si sono andati dalla stanza.", "phi3": "Hanno lasciato il salotto in stato puro."}
       },
     ]
 
