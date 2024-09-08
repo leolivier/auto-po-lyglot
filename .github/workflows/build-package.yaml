@@ -71,19 +71,9 @@ jobs:
         fail_on_empty: false
         sort_keys: false
 
-    - name: Build package
-      run: python -m build
-
-    - name: Publish package distributions to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
-        user: __token__
-        password: ${{ secrets.TEST_PYPI_SECRET_TOKEN }}
-
     - name: Test with pytest (only for testing, to be removed and tested with Ollama if connection error)
       run: |
-        pip install -i https://test.pypi.org/simple/ auto-po-lyglot
+        pip install .
         pip list | grep auto-po-lyglot
         pytest -s ./tests
 
