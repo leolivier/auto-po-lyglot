@@ -11,7 +11,7 @@ TEST_TRANSLATIONS = [
         "original_phrase": "He gave her a ring.",
         "context_translation": "Il lui a donné une bague.",
         "target_translation": {
-          "gemma2:2b": "Lui ha dato una collana.",
+          "gemma2:2b": "Lui ha regalato una collana.",
           "phi3": "Ha dato a lei una collana."
         }
       },
