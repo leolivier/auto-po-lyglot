@@ -10,12 +10,18 @@ TEST_TRANSLATIONS = [
       {
         "original_phrase": "He gave her a ring.",
         "context_translation": "Il lui a donné une bague.",
-        "target_translation": "Lui ha regalato un anello."
+        "target_translation": {
+          "gemma2:2b": "Lui ha regalato un anello.",
+          "phi3": "Ha dato a lei una collana."
+        }
       },
       {
         "original_phrase": "She made a call.",
         "context_translation": "Elle a pris une décision.",
-        "target_translation": "Lei ha preso una decisione."
+        "target_translation": {
+          "gemma2:2b": "Lei ha preso una decisione.",
+          "phi3": "Ha preso una decisione."
+        }
       },
       {
         "original_phrase": "They left the room.",

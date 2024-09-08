@@ -73,6 +73,9 @@ class TestTranspo:
 """
           print(trans_exp)
           outfile.write(f'{out} {trans_exp}')
-          assert translation == tr['target_translation']
+          if type(tr['target_translation']) is str:
+            assert translation == tr['target_translation']
+          else:
+            assert translation == tr['target_translation'][llm_client.params.model]
       outfile.close()
     # extract_csv_translations(output_file, params)
