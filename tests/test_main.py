@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 from auto_po_lyglot import ParamsLoader
 # from auto_po_lyglot import process_file
 from .settings import OUTPUT_DIRECTORY, TEST_TRANSLATIONS
@@ -51,6 +52,11 @@ class TestTranspo:
     pass
 
   def test_main(self, params, llm_client, output_file):
+    if 'GENTESTVALUES' in os.environ:
+      print("Skipping test_main because GENTESTVALUES is set: only generating test values")
+      gentestonly = True
+    else:
+      gentestonly = False
 
     print(f"Using model {llm_client.params.model} for {params.original_language} -> {params.context_language} -> "
           f"{params.test_target_languages} with an {params.llm_client} client")
@@ -58,8 +64,7 @@ class TestTranspo:
       for target_language in params.test_target_languages:
         llm_client.target_language = target_language
         for tr in TEST_TRANSLATIONS:
-          out = f"""
-  {{
+          out = f"""  {{
     "original_phrase": "{tr['original_phrase']}",  # {params.original_language}
     "context_translation": "{tr['context_translation']}",  # {params.context_language}
     "target_translation": """
@@ -68,11 +73,13 @@ class TestTranspo:
           comment = explanation.replace('\n', '\n# ')
           trans_exp = f"""{translation}  # {target_language}
   # {comment}
-
   }},
 """
           print(trans_exp)
           outfile.write(f'{out} {trans_exp}')
+          outfile.flush()
+          if gentestonly:  # no assert if gentestonly
+            continue
           if type(tr['target_translation']) is str:
             assert translation == tr['target_translation']
           else:
