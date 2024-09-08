@@ -12,7 +12,7 @@ on:
 
 env:
   LLM_CLIENT: ollama
-  MODEL: phi3
+  LLM_MODEL: phi3
   LOG_LEVEL: INFO
   INPUT_PO: tests/input/input.po
   ORIGINAL_LANGUAGE: English
@@ -24,7 +24,7 @@ env:
   # Touch this file to force it to update Ollama
   OLLAMA_VERSION_FILE: '.github/workflows/ollama-version.txt'
   # Put in this file a list of all models you want to pull from Ollama, one per line. 
-  # MODEL must be set to one of these
+  # LLM_MODEL must be set to one of these
   MODEL_LIST_FILE: '.github/workflows/model-list.txt'
 
 jobs:
@@ -62,7 +62,7 @@ jobs:
         envkey_CONTEXT_LANGUAGE: ${{ env.CONTEXT_LANGUAGE }}
         envkey_TARGET_LANGUAGES: ${{ env.TARGET_LANGUAGES }}
         envkey_LLM_CLIENT: ${{ env.LLM_CLIENT }}
-        envkey_LLM_MODEL: ${{ env.MODEL }}
+        envkey_LLM_MODEL: ${{ env.LLM_MODEL }}
         envkey_OLLAMA_BASE_URL: ${{ env.OLLAMA_BASE_URL }}
         directory: .
         file_name: .env
@@ -74,6 +74,8 @@ jobs:
         pip install .
         echo "Running pytest with .env file:"
         cat .env
+        echo "Running pytest with environment variables:"
+        env | grep -E 'LOG_LEVEL|INPUT_PO|ORIGINAL_LANGUAGE|CONTEXT_LANGUAGE|TARGET_LANGUAGES|LLM_CLIENT|LLM_MODEL|OLLAMA_BASE_URL'
         pytest -s ./tests
 
     - name: Display Ollama version
