@@ -17,7 +17,7 @@ class ClaudeClient(TranspoClient):
       message = self.client.messages.create(
         model=self.params.model,
         max_tokens=1000,
-        temperature=0.2,
+        temperature=self.params.temperature,
         system=system_prompt,
         messages=[
             {
@@ -49,7 +49,7 @@ class CachedClaudeClient(ClaudeClient):
         response = self.client.beta.prompt_caching.messages.create(
           model=self.params.model,
           max_tokens=1024,
-          temperature=0.2,
+          temperature=self.params.temperature,
           system=[
             {
               "type": "text",

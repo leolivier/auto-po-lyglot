@@ -54,38 +54,45 @@ the context translation."""
     # Add arguments
     parser.add_argument('-p', '--show_prompts',
                         action='store_true',
-                        help='show the prompts used for translations and exits')
+                        help='show the prompts used for translation and exits')
     parser.add_argument('-l', '--llm',
                         type=str,
                         help='Le type of LLM you want to use. Can be openai, ollama, claude or claude_cached. '
-                             'For openai or claude[_cached], you need to set the api key in the environment')
+                             'For openai or claude[_cached], you need to set the api key in the environment. '
+                             'Supersedes LLM_CLIENT in .env. Default is ollama')
     parser.add_argument('-m', '--model',
                         type=str,
-                        help='the name of the model to use. If not provided, a default model '
-                             'will be used, based on the chosen client')
+                        help='the name of the model to use. Supersedes LLM_MODEL in .env. If not provided at all, '
+                             'a default model will be used, based on the chosen client')
+    parser.add_argument('-t', '--temperature',
+                        type=float,
+                        help='the temperature of the model. Supersedes TEMPERATURE in .env. If not provided at all, '
+                             'a default value of 0.2 will be used')
     parser.add_argument('--original_language',
                         type=str,
-                        help='the language of the original phrase')
+                        help='the language of the original phrase. Supersedes ORIGINAL_LANGUAGE in .env. ')
     parser.add_argument('--context_language',
                         type=str,
-                        help='the language of the context translation')
+                        help='the language of the context translation. Supersedes CONTEXT_LANGUAGE in .env. ')
     parser.add_argument('--target_language',
                         type=str,
-                        help='the language into which the original phrase will be translated')
+                        help='the language into which the original phrase will be translated. Supersedes '
+                             'TARGET_LANGUAGE in .env. ')
     parser.add_argument('-i', '--input_po',
                         type=str,
                         help='the .po file containing the msgids (phrases to be translated) '
-                              'and msgstrs (context translations)')
+                              'and msgstrs (context translations). Supersedes INPUT_PO in .env.')
     parser.add_argument('-o', '--output_po',
                         type=str,
                         help='the .po file where the translated results will be written. If not provided, '
                              'it will be created in the same directory as the input_po except if the input po file has '
                              'the specific format .../locale/<context language code>/LC_MESSAGES/<input po file name>. '
                              'In this case, the output po file will be created as '
-                             '.../locale/<target language code>/LC_MESSAGES/<input po file name>.')
+                             '.../locale/<target language code>/LC_MESSAGES/<input po file name>. Supersedes '
+                             'OUTPUT_PO in .env.')
 
-    parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode')
-    parser.add_argument('-vv', '--debug', action='store_true', help='debug mode')
+    parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode. Equivalent to LOG_LEVEL=INFO in .env')
+    parser.add_argument('-vv', '--debug', action='store_true', help='debug mode. Equivalent to LOG_LEVEL=DEBUG in .env')
     if additional_args:
       for arg in additional_args:
         if arg.get('action'):
@@ -142,6 +149,8 @@ the context translation."""
     self.user_prompt = environ.get('USER_PROMPT', None)
     if self.user_prompt:
       logger.debug(f"USER_PROMPT environment variable is set to '{self.user_prompt}'")
+
+    self.temperature = args.temperature or float(environ.get('TEMPERATURE', 0.2))
 
     self.input_po = args.input_po or environ.get('INPUT_PO', None)
     self.output_po = args.output_po or environ.get('OUTPUT_PO', None)
