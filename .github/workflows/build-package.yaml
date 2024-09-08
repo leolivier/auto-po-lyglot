@@ -69,6 +69,13 @@ jobs:
         fail_on_empty: false
         sort_keys: false
 
+    - name: Test with pytest (remove this step after testing params are ok)
+      run: |
+        pip install .
+        echo "Running pytest with .env file:"
+        cat .env
+        pytest -s ./tests
+
     - name: Display Ollama version
       run: |
         echo "Ollama version file content:"
