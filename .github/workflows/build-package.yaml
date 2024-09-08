@@ -12,7 +12,7 @@ on:
 
 env:
   LLM_CLIENT: ollama
-  LLM_MODEL: phi3
+  LLM_MODEL: gemma2:2b  # or phi3
   LOG_LEVEL: INFO
   INPUT_PO: tests/input/input.po
   ORIGINAL_LANGUAGE: English
@@ -80,29 +80,22 @@ jobs:
       uses: actions/cache@v3
       id: cache-ollama
       with:
-        path: ~/.ollama
+        path: /usr/local/bin/ollama
         key: ${{ runner.os }}-ollama-${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
         restore-keys: |
           ${{ runner.os }}-ollama-
 
-    - name: Debug Cache Ollama
+    - name: Install Ollama (not cached)
+      if : steps.cache-ollama.outputs.cache-hit != 'true'
       run: |
-        echo "Cache hit: ${{ steps.cache-ollama.outputs.cache-hit }}"
-        if [ "${{ steps.cache-ollama.outputs.cache-hit }}" != 'true' ]; then
-          echo "Cache miss. This is normal if this is the first run or if the Ollama version has changed."
-        fi
+        echo "Cache miss. This is normal if this is the first run or if the Ollama version has changed."
+        echo "Installing Ollama"
+        curl https://ollama.ai/install.sh | sh
 
-    - name: Install or Use Cached Ollama
+    - name: Use Cached Ollama
+      if : steps.cache-ollama.outputs.cache-hit == 'true'
       run: |
-        if [ ! -f ~/.ollama/bin/ollama ]; then
-          echo "Installing Ollama"
-          curl https://ollama.ai/install.sh | sh
-          mkdir -p ~/.ollama/bin
-          cp /usr/local/bin/ollama ~/.ollama/bin/ollama
-        else
-          echo "Using cached Ollama"
-        fi
-        sudo ln -sf ~/.ollama/bin/ollama /usr/local/bin/ollama
+        echo "Cache Hit. No need to reinstall Ollama. Version="
         ollama --version
 
     - name: Start Ollama and wait for it to serve
@@ -117,15 +110,10 @@ jobs:
         path: ~/.ollama/models
         key: ${{ runner.os }}-ollama-models-${{ hashFiles(env.MODEL_LIST_FILE) }}
 
-    - name: Debug Cache Models
+    - name: Pull Ollama models (not cached)
+      if: steps.cache-models.outputs.cache-hit != 'true'
       run: |
-        echo "Models cache hit: ${{ steps.cache-models.outputs.cache-hit }}"
-        if [ "${{ steps.cache-models.outputs.cache-hit }}" != 'true' ]; then
-          echo "Models cache miss. This is normal if this is the first run or if the model list has changed."
-        fi
-
-    - name: Pull Ollama models
-      run: |
+        echo "Models cache miss. This is normal if this is the first run or if the model list has changed."
         while IFS= read -r model || [[ -n "$model" ]]; do
           if [ ! -f ~/.ollama/models/${model}.bin ]; then
             echo "Pulling model: $model"
@@ -135,6 +123,12 @@ jobs:
           fi
         done < ${{ env.MODEL_LIST_FILE }}
         ollama list
+
+    - name: Reuse Ollama cached models
+      if: steps.cache-models.outputs.cache-hit == 'true'
+      run: |
+          echo "Models cache hit! No need to re-pull them."
+          ollama list
 
     - name: Debug final state
       if: always()
@@ -154,4 +148,4 @@ jobs:
         # EXTREMELY WEIRD: if you remove these 2 lines, the test fails because LLM_MODEL is not set.
         echo "Running pytest with environment variables:"
         env | grep -E 'LOG_LEVEL|INPUT_PO|ORIGINAL_LANGUAGE|CONTEXT_LANGUAGE|TARGET_LANGUAGES|LLM_CLIENT|LLM_MODEL|OLLAMA_BASE_URL'
-        pytest -s ./tests
+        pytest -s -v ./tests
