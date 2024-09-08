@@ -5,6 +5,7 @@ from os import environ
 OUTPUT_DIRECTORY = "./tests/output"
 
 # Some ambiguous sentences in the ORIGINAL_LANGUAGE and their CONTEXT_LANGUAGE translations for testing
+# WARNING: assumes target language is Italian!
 TEST_TRANSLATIONS = [
       {
         "original_phrase": "He gave her a ring.",
