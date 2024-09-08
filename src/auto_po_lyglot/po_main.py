@@ -98,6 +98,7 @@ def main():
       assert Path(params.input_po).exists(), f"Input .po file {params.input_po} does not exist"
       po = polib.pofile(params.input_po)
       try:
+        nb_translations = 0
         for entry in po:
           if entry.msgid and not entry.fuzzy:
             context_translation = entry.msgstr if entry.msgstr else entry.msgid
@@ -115,10 +116,14 @@ def main():
   Comment:{explanation if explanation else ''}
   """)
             sleep(1.0)  # Sleep for 1 second to avoid rate limiting
+            nb_translations += 1
       except Exception as e:
         logger.info(f"Error: {e}")
       # Save the new .po file even if there was an error to not lose what was translated
       po.save(output_file)
+      percent_translated = round(nb_translations / len(po) * 100, 2)
+      logger.info(f"Saved {output_file}, translated {nb_translations} entries out "
+                  f"of {len(po)} entries ({percent_translated}%)")
 
 
 if __name__ == "__main__":
