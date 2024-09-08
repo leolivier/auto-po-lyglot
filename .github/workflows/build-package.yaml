@@ -12,12 +12,12 @@ on:
 
 env:
   LLM_CLIENT: ollama
-  MODEL: gemma2:2b
+  MODEL: phi3
   LOG_LEVEL: INFO
   INPUT_PO: tests/input/input.po
   ORIGINAL_LANGUAGE: English
   CONTEXT_LANGUAGE: French
-  TARGET_LANGUAGES: German  # comma separated list
+  TARGET_LANGUAGES: Italian  # comma separated list
   OLLAMA_BASE_URL: "http://localhost:11434/v1"
   # 2 files used to cache the Ollama version and model list
   # so that they do not need to be downloaded every time
