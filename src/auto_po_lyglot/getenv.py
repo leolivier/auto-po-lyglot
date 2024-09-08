@@ -161,7 +161,7 @@ the context translation."""
         arg = argument.get('arg')
         while arg.startswith('-'):
           arg = arg[1:]
-        val = getattr(args, arg) or environ.get(argument.get('env'), argument.get('default', None))
+        val = getattr(args, arg) or environ.get(argument.get('env', 'UNDEFINED_VARIABLE'), argument.get('default', None))
         setattr(self, arg, val)
 
     logger.info(f"Loaded Params: {self.__dict__}")
