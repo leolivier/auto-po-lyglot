@@ -155,7 +155,7 @@ the context translation."""
         val = getattr(args, arg) or environ.get(argument.get('env'), argument.get('default', None))
         setattr(self, arg, val)
 
-    logger.debug(f"Params: {self.__dict__}")
+    logger.info(f"Loaded Params: {self.__dict__}")
 
   def get_client(self):
     if not self._client:
