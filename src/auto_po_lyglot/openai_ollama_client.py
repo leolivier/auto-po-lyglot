@@ -1,4 +1,4 @@
-from base import TranspoClient, TranspoException
+from .base import TranspoClient, TranspoException
 from openai import OpenAI
 
 
@@ -25,7 +25,7 @@ class OpenAIAPICompatibleClient(TranspoClient):
               {"role": "user", "content": user_prompt},
             ],
             # max_tokens=2000,
-            temperature=0.2,
+            temperature=self.params.temperature,
             stream=False
         )
         return response.choices[0].message.content.strip()

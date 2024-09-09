@@ -1,0 +1,149 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python package
+
+on:
+  push:
+    branches: [ "main", "pypi-packaging" ]
+  pull_request:
+    branches: [ "main" ]
+
+
+env:
+  LLM_CLIENT: ollama
+  LLM_MODEL: gemma2:2b  # or phi3
+  LOG_LEVEL: INFO
+  INPUT_PO: tests/input/input.po
+  ORIGINAL_LANGUAGE: English
+  CONTEXT_LANGUAGE: French
+  TARGET_LANGUAGES: Italian  # comma separated list
+  OLLAMA_BASE_URL: "http://localhost:11434/v1"
+  # 2 files used to cache the Ollama version and model list
+  # so that they do not need to be downloaded every time
+  # Touch this file to force it to update Ollama
+  OLLAMA_VERSION_FILE: '.github/workflows/ollama-version.txt'
+  # Put in this file a list of all models you want to pull from Ollama, one per line. 
+  # LLM_MODEL must be set to one of these
+  MODEL_LIST_FILE: '.github/workflows/model-list.txt'
+
+jobs:
+
+  test-with-ollama:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest build
+
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 ./src ./tests --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 ./src ./tests --count --exit-zero --max-complexity=10 --max-line-length=127 --indent-size 2 --statistics
+
+    - name: Make envfile
+      uses: SpicyPizza/create-envfile@v2.0.3
+      with:
+        envkey_LOG_LEVEL: ${{ env.LOG_LEVEL }}
+        envkey_INPUT_PO: ${{ env.INPUT_PO }}
+        envkey_ORIGINAL_LANGUAGE: ${{ env.ORIGINAL_LANGUAGE }}
+        envkey_CONTEXT_LANGUAGE: ${{ env.CONTEXT_LANGUAGE }}
+        envkey_TARGET_LANGUAGES: ${{ env.TARGET_LANGUAGES }}
+        envkey_LLM_CLIENT: ${{ env.LLM_CLIENT }}
+        envkey_LLM_MODEL: ${{ env.LLM_MODEL }}
+        envkey_OLLAMA_BASE_URL: ${{ env.OLLAMA_BASE_URL }}
+        directory: .
+        file_name: .env
+        fail_on_empty: false
+        sort_keys: false
+
+    - name: Display Ollama version
+      run: |
+        echo "Ollama version file content:"
+        cat ${{ env.OLLAMA_VERSION_FILE }}
+        echo "Ollama version hash:"
+        echo ${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
+
+    - name: Cache Ollama
+      uses: actions/cache@v3
+      id: cache-ollama
+      with:
+        path: /usr/local/bin/ollama
+        key: ${{ runner.os }}-ollama-${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
+
+    - name: Install Ollama (not cached)
+      if : steps.cache-ollama.outputs.cache-hit != 'true'
+      run: |
+        echo "Cache miss. This is normal if this is the first run or if the Ollama version has changed."
+        echo "Installing Ollama"
+        curl https://ollama.ai/install.sh | sh
+
+    - name: Use Cached Ollama
+      if : steps.cache-ollama.outputs.cache-hit == 'true'
+      run: |
+        echo "Cache Hit. No need to reinstall Ollama. Version="
+        ollama --version
+
+    - name: Start Ollama and wait for it to serve
+      run: |
+        ollama serve &
+        sleep 10
+
+    - name: Cache Ollama models
+      uses: actions/cache@v3
+      id: cache-models
+      with:
+        path: ~/.ollama/models
+        key: ${{ runner.os }}-ollama-models-${{ hashFiles(env.MODEL_LIST_FILE) }}
+
+    - name: Pull Ollama models (not cached)
+      if: steps.cache-models.outputs.cache-hit != 'true'
+      run: |
+        echo "Models cache miss. This is normal if this is the first run or if the model list has changed."
+        while IFS= read -r model || [[ -n "$model" ]]; do
+          if [ ! -f ~/.ollama/models/${model}.bin ]; then
+            echo "Pulling model: $model"
+            ollama pull $model
+          else
+            echo "Model already cached: $model"
+          fi
+        done < ${{ env.MODEL_LIST_FILE }}
+        ollama list
+
+    - name: Reuse Ollama cached models
+      if: steps.cache-models.outputs.cache-hit == 'true'
+      run: |
+          echo "Models cache hit! No need to re-pull them."
+          ollama list
+
+    - name: Debug final state
+      if: always()
+      run: |
+        echo "Ollama version:"
+        ollama --version
+        echo "Available models:"
+        ollama list
+        echo "Ollama directory content:"
+        ls -R ~/.ollama
+
+    - name: Test with pytest
+      run: |
+        pip install .
+        echo "Running pytest with .env file:"
+        cat .env
+        # EXTREMELY WEIRD: if you remove these 2 lines, the test fails because LLM_MODEL is not set.
+        echo "Running pytest with environment variables:"
+        env | grep -E 'LOG_LEVEL|INPUT_PO|ORIGINAL_LANGUAGE|CONTEXT_LANGUAGE|TARGET_LANGUAGES|LLM_CLIENT|LLM_MODEL|OLLAMA_BASE_URL'
+        pytest -s -v ./tests

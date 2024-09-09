@@ -1,0 +1,14 @@
+# make sure your env is clean by running `source unset_env`
+# warning, this will unset the API keys so if they are not in your .env file, comment the 2 first lines... 
+unset ANTHROPIC_API_KEY
+unset OPENAI_API_KEY
+unset USER_PROMPT2
+unset USER_PROMPT1
+unset SYSTEM_PROMPT1
+unset SYSTEM_PROMPT2
+unset USER_PROMPT
+unset SYSTEM_PROMPT
+unset ORIGINAL_LANGUAGE
+unset LLM_MODEL
+unset TARGET_LANGUAGES
+unset LLM_CLIENT
