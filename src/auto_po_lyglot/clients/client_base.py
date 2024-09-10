@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
 import logging
-from .default_prompts import (
+from ..default_prompts import (
   system_prompt as default_system_prompt,
+  additional_system_prompt,
   user_prompt as default_user_prompt,
   po_placeholder_examples,
   basic_examples,
-  ambiguous_examples)
+  ambiguous_examples,
+  additional_system_prompt_examples,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +18,13 @@ class TranspoException(Exception):
 
 
 class TranspoClient(ABC):
+  """
+  Base class for all LLM clients.
+  """
+  # set to True in client sub classes to use a large system prompt. Useful for claude_cached 
+  # where the system prompt must at least be 1024 tokens
+  use_large_system_prompt = False
+
   def __init__(self, params, target_language=None):
     self.params = params
     # target language can be set later but before any translation.
@@ -41,6 +51,20 @@ class TranspoClient(ABC):
 
   def get_system_prompt(self):
     format = self.params.system_prompt or default_system_prompt
+    if self.use_large_system_prompt:
+      format += '\n\nAdditional system prompt examples:\n'
+      i = 1
+      for example in additional_system_prompt_examples:
+        params = {
+          'original_language': self.params.original_language,
+          'context_language': self.params.context_language,
+          'target_language': self.target_language,
+          'original_phrase': example[self.params.original_language],
+          'context_translation': example[self.params.context_language],
+          'target_translation': example[self.target_language],
+        }
+        format += f'Example #{i}:\n{additional_system_prompt.format(**params)}\n'
+        i += 1
     logger.debug("system prompt format: ", format)
     # print("default system prompt format: ", default_system_prompt)
     try:

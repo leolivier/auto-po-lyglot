@@ -1,9 +1,9 @@
 from .getenv import ParamsLoader
 from .csv_extractor import extract_csv
-from .openai_ollama_client import OpenAIAPICompatibleClient, OpenAIClient, OllamaClient
-from .claude_client import ClaudeClient, CachedClaudeClient
-from .base import TranspoClient
-
+from .clients.openai_ollama_client import OpenAIAPICompatibleClient, OpenAIClient, OllamaClient
+from .clients.claude_client import ClaudeClient, CachedClaudeClient
+from .clients.client_base import TranspoClient
+from .clients.gemini_client import GeminiClient
 __all__ = [
   'ParamsLoader',
   'OpenAIAPICompatibleClient',
@@ -11,5 +11,6 @@ __all__ = [
   'OllamaClient',
   'ClaudeClient',
   'CachedClaudeClient',
+  'GeminiClient',
   'TranspoClient',
   'extract_csv']

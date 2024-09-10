@@ -1,6 +1,6 @@
 from time import sleep
 from anthropic import Anthropic
-from .base import TranspoClient, TranspoException
+from .client_base import TranspoClient, TranspoException
 import logging
 
 logger = logging.getLogger(__name__)
@@ -37,6 +37,7 @@ class ClaudeClient(TranspoClient):
 
 
 class CachedClaudeClient(ClaudeClient):
+  use_large_system_prompt = True  # claude cached system prompt must be at least 1024 tokens
   first = True
 
   def get_translation(self, system_prompt, user_prompt):

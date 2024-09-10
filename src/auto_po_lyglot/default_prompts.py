@@ -9,15 +9,15 @@ As the provided sentences can be short and ambiguous, the user will also provide
 for this {original_language} sentence. Please, consider this {context_language} translation for desambiguating the meaning
 of the {original_language} sentence. Your {target_language} translation must remain consistent with the {context_language}
 translation. Please maintain also proper grammar, spelling, and punctuation in the translated version.
-The input will have the following format:
+The user input will have the following format:
 ```
-{original_language} sentence: "original sentence to be translated", {context_language} translation: "context translation of this sentence".
+{original_language} sentence: "original sentence to be translated", {context_language} translation: "context translation of this sentence"
 ```
 Please respond only with the best translation you find for the {original_language} sentence, surrounded by double quotes and
 with absolutely no words before it.
 Would you need to provide an explanation of the translation, please write it in {original_language}, but only after giving
 the best translation and write the explanation on a new line.
-For example, if you would receive as input:
+For example, if you would receive as user input this simple translation:
 ```
 {original_language}: "{simple_original_phrase}", {context_language} translation: "{simple_context_translation}"
 ```
@@ -26,7 +26,7 @@ your output in {target_language} would be:
 "{simple_target_translation}"
 ```
 
-Another input example with an ambiguous original sentence for which you need an explanation:
+Another input example with an ambiguous original sentence for which you need to explain your translation:
 ```
 {original_language} sentence: "{ambiguous_original_phrase}", {context_language} translation: "{ambiguous_context_translation}"
 ```
@@ -49,7 +49,7 @@ would be translated in {target_language} into:
 ```
 "{po_placeholder_target_translation_1}"
 ```
-and, using another placheolder format:
+and, using another placeholder format:
 ```
 {original_language} sentence: "{po_placeholder_original_phrase_2}", {context_language} translation: "{po_placeholder_context_translation_2}"
 ```
@@ -66,6 +66,22 @@ would be translated in {target_language} into:
 "{po_placeholder_target_translation_3}"
 ```
 """  # noqa
+
+# The additional system prompt examples can be added here. They are used only by clients like claude_cached where it is better
+# to have large system prompts (eg system prompt for "claude cached" client must be more than 1024 tokens large to really cache
+# it and be efficient in terms of cost). This prompt will be added at the end of the system prompt and filled with the
+# following variables: original_language, context_language and target_language plus original_phrase, context_translation,
+# and target_translation
+additional_system_prompt = """
+user input:
+```
+{original_language} sentence: "{original_phrase}", {context_language} translation: "{context_translation}"
+```
+your output:
+```
+{target_translation}
+```
+"""
 
 user_prompt = """{original_language} sentence: "{original_phrase}", {context_language} translation: "{context_translation}" """
 
@@ -171,5 +187,44 @@ po_placeholder_examples = [
     "Spanish": "%s ha creado un nuevo %s: %s",
     "German": "%s hat ein neues %s erstellt: %s",
     "Portuguese": "%s criou um novo %s: %s"
+  },
+]
+
+# ========= ADDITIONAL EXAMPLES =============================================================
+# Additional examples is a list of translations in different languages for the same simple phrase.
+# These examples are used to fill the additional_system_prompt placeholder in the system prompt.
+# It has the same format as basic_examples
+additional_system_prompt_examples = [
+  {
+    "English": "What's up?",
+    "French": "Quoi de neuf?",
+    "Italian": "Cosa stai facendo?",
+    "Spanish": "¿Que tal?",
+    "German": "Was geht?",
+    "Portuguese": "O que esta fazendo?"
+  },
+  {
+    "English": "How are you?",
+    "French": "Comment allez-vous?",
+    "Italian": "Come stai?",
+    "Spanish": "¿Como estas?",
+    "German": "Wie geht es dir?",
+    "Portuguese": "Como estou?"
+  },
+  {
+    "English": "What time is it?",
+    "French": "Quelle heure est-il?",
+    "Italian": "Ora?",
+    "Spanish": "¿Que hora es?",
+    "German": "Wann ist es?",
+    "Portuguese": "Qual hora é?"
+  },
+  {
+    "English": "How old are you?",
+    "French": "Quel age avez-vous?",
+    "Italian": "Quanti anni hai?",
+    "Spanish": "¿Cuantos anios tienes?",
+    "German": "Wie alt bist du?",
+    "Portuguese": "Quantos anos tens?"
   },
 ]
