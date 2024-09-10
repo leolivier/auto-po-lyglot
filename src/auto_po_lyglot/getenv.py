@@ -60,7 +60,7 @@ the context translation."""
                         help='Le type of LLM you want to use. Can be openai, ollama, claude or claude_cached. '
                              'For openai or claude[_cached], you need to set the api key in the environment. '
                              'Supersedes LLM_CLIENT in .env. Default is ollama',
-                        choices=['openai', 'ollama', 'claude', 'claude_cached', 'gemini'])
+                        choices=['openai', 'ollama', 'claude', 'claude_cached', 'gemini', 'grok'])
     parser.add_argument('-m', '--model',
                         type=str,
                         help='the name of the model to use. Supersedes LLM_MODEL in .env. If not provided at all, '
@@ -184,6 +184,8 @@ the context translation."""
           from .clients.claude_client import CachedClaudeClient as LLMClient
         case 'gemini':
           from .clients.gemini_client import GeminiClient as LLMClient
+        case 'grok':
+          from .clients.grok_client import GrokClient as LLMClient
         case _:
           raise Exception(
             f"LLM_CLIENT must be one of 'ollama', 'openai', 'claude' or 'claude_cached', not '{self.llm_client}'"
