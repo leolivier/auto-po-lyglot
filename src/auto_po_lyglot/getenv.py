@@ -59,7 +59,8 @@ the context translation."""
                         type=str,
                         help='Le type of LLM you want to use. Can be openai, ollama, claude or claude_cached. '
                              'For openai or claude[_cached], you need to set the api key in the environment. '
-                             'Supersedes LLM_CLIENT in .env. Default is ollama')
+                             'Supersedes LLM_CLIENT in .env. Default is ollama',
+                        choices=['openai', 'ollama', 'claude', 'claude_cached', 'gemini'])
     parser.add_argument('-m', '--model',
                         type=str,
                         help='the name of the model to use. Supersedes LLM_MODEL in .env. If not provided at all, '
@@ -171,16 +172,18 @@ the context translation."""
 
       match self.llm_client:
         case 'ollama':
-          from .openai_ollama_client import OllamaClient as LLMClient
+          from .clients.openai_ollama_client import OllamaClient as LLMClient
         case 'openai':
           # uses OpenAI GPT-4o by default
-          from .openai_ollama_client import OpenAIClient as LLMClient
+          from .clients.openai_ollama_client import OpenAIClient as LLMClient
         case 'claude':
           # uses Claude Sonnet 3.5 by default
-          from .claude_client import ClaudeClient as LLMClient
+          from .clients.claude_client import ClaudeClient as LLMClient
         case 'claude_cached':
           # uses Claude Sonnet 3.5, cached mode for long system prompts
-          from .claude_client import CachedClaudeClient as LLMClient
+          from .clients.claude_client import CachedClaudeClient as LLMClient
+        case 'gemini':
+          from .clients.gemini_client import GeminiClient as LLMClient
         case _:
           raise Exception(
             f"LLM_CLIENT must be one of 'ollama', 'openai', 'claude' or 'claude_cached', not '{self.llm_client}'"
