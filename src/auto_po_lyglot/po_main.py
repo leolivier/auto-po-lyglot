@@ -118,7 +118,7 @@ def main():
             sleep(1.0)  # Sleep for 1 second to avoid rate limiting
             nb_translations += 1
       except Exception as e:
-        logger.info(f"Error: {e}")
+        logger.error(f"Error: {e}")
       # Save the new .po file even if there was an error to not lose what was translated
       po.save(output_file)
       percent_translated = round(nb_translations / len(po) * 100, 2)
