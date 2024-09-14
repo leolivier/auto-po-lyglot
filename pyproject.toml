@@ -4,12 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "auto-po-lyglot"
-version = "1.3.2"
+version = "1.3.3"
 #dynamic = ["version"]
 authors = [
   { name="Olivier LEVILLAIN", email="levillain.olivier@gmail.com" },
 ]
-# description = "A Python package to translate po files using LLMs. Implements ChatGPT, Claude, Gemini, Grok and Ollama clients. (Note: Grok implemented but not tested yet as Grok API is not yet available in my country). Uses a 1rst manual translation for desambiguating short PO pieces of sentences."
+short-description = "A Python package to translate po files using LLMs. Implements ChatGPT, Claude, Gemini, Grok and Ollama clients. (Note: Grok implemented but not tested yet as Grok API is not yet available in my country). Uses a 1rst manual translation for desambiguating short PO pieces of sentences."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies=[
