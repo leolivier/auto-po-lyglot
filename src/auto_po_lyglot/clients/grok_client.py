@@ -1,12 +1,12 @@
 import xai_sdk
 import asyncio
-from .client_base import TranspoClient
+from .client_base import AutoPoLyglotClient
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class GrokClient(TranspoClient):
+class GrokClient(AutoPoLyglotClient):
   def __init__(self, params, target_language=None):
     params.model = params.model or ""  # default model given by Grok itself if not provided
     super().__init__(params, target_language)

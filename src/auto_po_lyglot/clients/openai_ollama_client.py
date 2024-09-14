@@ -1,8 +1,8 @@
-from .client_base import TranspoClient, TranspoException
+from .client_base import AutoPoLyglotClient, PoLyglotException
 from openai import OpenAI
 
 
-class OpenAIAPICompatibleClient(TranspoClient):
+class OpenAIAPICompatibleClient(AutoPoLyglotClient):
   def get_translation(self, system_prompt, user_prompt):
     """
     Retrieves a translation from any OpenAI API compatible client based on the provided system and user prompts.
@@ -30,14 +30,14 @@ class OpenAIAPICompatibleClient(TranspoClient):
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        raise TranspoException(str(e))
+        raise PoLyglotException(str(e))
 
 
 class OpenAIClient(OpenAIAPICompatibleClient):
     def __init__(self, params, target_language=None):
         params.model = params.model or "gpt-4o-2024-08-06"  # default model if not provided
         super().__init__(params, target_language)
-        self.client = OpenAI(api_key=params.open_api_key) if hasattr(params, 'open_api_key') else OpenAI()
+        self.client = OpenAI(api_key=params.openai_api_key) if hasattr(params, 'openai_api_key') else OpenAI()
 
 # TODO: implement a batch openai client
 
