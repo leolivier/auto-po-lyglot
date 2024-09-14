@@ -35,7 +35,7 @@ class OpenAIAPICompatibleClient(AutoPoLyglotClient):
 
 class OpenAIClient(OpenAIAPICompatibleClient):
     def __init__(self, params, target_language=None):
-        params.model = params.model or "gpt-4o-2024-08-06"  # default model if not provided
+        params.model = params.model or "gpt-4o-latest"  # default model if not provided
         super().__init__(params, target_language)
         self.client = OpenAI(api_key=params.openai_api_key) if hasattr(params, 'openai_api_key') else OpenAI()
 
