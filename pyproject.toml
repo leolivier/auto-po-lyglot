@@ -47,7 +47,6 @@ packages = ["src/auto_po_lyglot"]
 
 [project.scripts]
 auto_po_lyglot = "auto_po_lyglot.po_main:main"
-auto_po_lyglot_ui = "stremlit run 
 
 [tool.hatch.build.targets.wheel.force-include]
 "src" = "auto_po_lyglot"
