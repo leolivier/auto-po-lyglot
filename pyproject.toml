@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "auto-po-lyglot"
-version = "1.2.0"
+version = "1.3.0"
 #dynamic = ["version"]
 authors = [
   { name="Olivier LEVILLAIN", email="levillain.olivier@gmail.com" },
@@ -47,6 +47,7 @@ packages = ["src/auto_po_lyglot"]
 
 [project.scripts]
 auto_po_lyglot = "auto_po_lyglot.po_main:main"
+auto_po_lyglot_ui = "stremlit run 
 
 [tool.hatch.build.targets.wheel.force-include]
 "src" = "auto_po_lyglot"
