@@ -93,6 +93,8 @@ streamlit_main()
 ```
 And run `streamlit run auto_po_lyglot_ui.py`
 Then, you can go to http://localhost:8501 and provide the necessary parameters. Most of them can be initialized based on the content of the .env file. A help button (with a '?') explains what to provide where.
+You can provide almost all the parameters described after a '--' e.g.:
+`streamlit run auto_po_lyglot_ui.py -- -l ollama -m phi3 -t 0.5`
 
 ## Running from the Command Line
 **Usage:** `auto_po_lyglot [-h] [-p] [-l LLM] [-m MODEL] [-t TEMPERATURE] [--original_language ORIGINAL_LANGUAGE] [--context_language CONTEXT_LANGUAGE]
