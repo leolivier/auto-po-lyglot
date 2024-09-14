@@ -1,12 +1,12 @@
 from time import sleep
 from anthropic import Anthropic
-from .client_base import TranspoClient, TranspoException
+from .client_base import AutoPoLyglotClient, PoLyglotException
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class ClaudeClient(TranspoClient):
+class ClaudeClient(AutoPoLyglotClient):
   def __init__(self, params, target_language=None):
     params.model = params.model or "claude-3-5-sonnet-20240620"  # default model if not provided
     super().__init__(params, target_language)
@@ -33,7 +33,7 @@ class ClaudeClient(TranspoClient):
       )
       return message.content[0].text
     except Exception as e:
-      raise TranspoException(str(e))
+      raise PoLyglotException(str(e))
 
 
 class CachedClaudeClient(ClaudeClient):
@@ -75,4 +75,4 @@ class CachedClaudeClient(ClaudeClient):
           sleep(next_retry_in)
           retries += 1
           continue
-        raise TranspoException(str(e))
+        raise PoLyglotException(str(e))

@@ -13,11 +13,11 @@ from ..default_prompts import (
 logger = logging.getLogger(__name__)
 
 
-class TranspoException(Exception):
+class PoLyglotException(Exception):
   pass
 
 
-class TranspoClient(ABC):
+class AutoPoLyglotClient(ABC):
   """
   Base class for all LLM clients.
   """
@@ -88,7 +88,7 @@ class TranspoClient(ABC):
           ambiguous_target_translation = ambiguous_example[self.target_language]
           break
       if ambiguous_original_phrase is None:
-        raise TranspoException("ambiguous_examples.py does not contain an ambiguous example for these languages")
+        raise PoLyglotException("ambiguous_examples.py does not contain an ambiguous example for these languages")
 
       # PO placeholders
       assert len(po_placeholder_examples) == 3
@@ -118,7 +118,7 @@ class TranspoClient(ABC):
         "po_placeholder_target_translation_3": po_placeholder_examples[2][self.target_language],
       }
     except KeyError as e:
-      raise TranspoException(f"examples.py does not contain an example for these piece: {str(e)}")
+      raise PoLyglotException(f"examples.py does not contain an example for these piece: {str(e)}")
 
     # first format the explanation then add it to the params before formatting the prompt
     explanation_params = prompt_params.copy()
@@ -135,7 +135,7 @@ class TranspoClient(ABC):
   def get_user_prompt(self, phrase, context_translation):
     format = self.params.user_prompt or default_user_prompt
     if format is None:
-      raise TranspoException("USER_PROMPT environment variable not set")
+      raise PoLyglotException("USER_PROMPT environment variable not set")
     params = {
       "original_language": self.params.original_language,
       "context_language": self.params.context_language,
@@ -158,7 +158,7 @@ class TranspoClient(ABC):
 
   def translate(self, phrase, context_translation):
       if self.target_language is None:
-        raise TranspoException("Error:target_language must be set before trying to translate anything")
+        raise PoLyglotException("Error:target_language must be set before trying to translate anything")
       system_prompt = self.get_system_prompt()
       user_prompt = self.get_user_prompt(phrase, context_translation)
       raw_result = self.get_translation(system_prompt, user_prompt)

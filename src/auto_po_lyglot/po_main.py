@@ -1,66 +1,13 @@
 #!/usr/bin/env python
 
-import langcodes
 import logging
 import polib
 from pathlib import Path
 from time import sleep
 
-from .getenv import ParamsLoader
-from .default_prompts import system_prompt, user_prompt
+from . import ClientBuilder, ParamsLoader, get_outfile_name, system_prompt, user_prompt
 
 logger = logging.getLogger(__name__)
-
-
-def get_language_code(language_name):
-    try:
-        # Search language by name
-        lang = langcodes.find(language_name)
-        # Returns ISO 639-1 code (2 characters)
-        return lang.language
-    except LookupError:
-        return None
-
-
-def get_outfile_name(model_name, input_po, target_language, context_language):
-    """
-    Generates a unique output file name based on the given model name and the parameters.
-
-    Args:
-        model_name (str): The name of the model.
-        params (TranspoParams): The parameters for the translation.
-    Returns:
-        Path: A unique output po file name in the format "{input_po}_{target_language}_{i}.po".
-    """
-    p = Path(input_po)
-    parent = p.parent
-    grandparent = parent.parent
-    context_lang_code = get_language_code(context_language)
-    target_code = get_language_code(target_language)
-    if parent.name == 'LC_MESSAGES' and grandparent.name == context_lang_code:
-      # we're in something like .../locale/<lang_code>/LC_MESSAGES/file.po
-      # let's try to build the same with the target language code
-      dir = grandparent.parent / target_code / 'LC_MESSAGES'
-      # create the directory if it doesn't exist
-      dir.mkdir(parents=True, exist_ok=True)
-      outfile = dir / p.name
-    else:  # otherwise, just add the model name and the target language code in the file name
-      model_name = model_name.replace(':', '-')
-      outfile = p.with_suffix(f'.{model_name}.{target_code}.po')
-
-    logger.info(f"Output file: {outfile}")
-    if outfile.exists():
-      logger.info("Output file already exists, won't overwrite.")
-      i = 0
-      i_outfile = outfile
-      # append a number to the filename
-      while i_outfile.exists():
-        i_outfile = outfile.with_suffix(f'.{i}.po')
-        i += 1
-      outfile = i_outfile
-      logger.info(f"Corrected output file: {outfile}")
-
-    return outfile
 
 
 def main():
@@ -79,17 +26,17 @@ def main():
         None
     """
 
-    params = ParamsLoader()
+    params = ParamsLoader().load()
 
     if params.show_prompts:
         print(f">>>>>>>>>>System prompt:\n{system_prompt}\n\n>>>>>>>>>>>>User prompt:\n{user_prompt}")
         exit(0)
 
-    client = params.get_client()
+    client = ClientBuilder(params).get_client()
 
     logger.info(f"Using model {client.params.model} to translate {params.input_po} from {params.original_language} -> "
-                f"{params.context_language} -> {params.test_target_languages} with an {params.llm_client} client")
-    for target_language in params.test_target_languages:
+                f"{params.context_language} -> {params.target_languages} with an {params.llm_client} client")
+    for target_language in params.target_languages:
       client.target_language = target_language
       output_file = params.output_po or get_outfile_name(client.params.model, params.input_po,
                                                          target_language, params.context_language)

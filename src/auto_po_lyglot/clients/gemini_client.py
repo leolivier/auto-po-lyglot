@@ -1,12 +1,12 @@
 import google.generativeai as genai
 import os
-from .client_base import TranspoClient
+from .client_base import AutoPoLyglotClient
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class GeminiClient(TranspoClient):
+class GeminiClient(AutoPoLyglotClient):
   cached_system_prompt = None
 
   def __init__(self, params, target_language=None):
