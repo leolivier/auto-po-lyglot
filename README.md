@@ -1,15 +1,19 @@
 # Goal of this project
-This project aims at using different LLMs to help translating po files using a first already translated file.
+The goal of this project is to use various LLMs to help translate po files using a first already translated file.
 
-For instance, you have a .po file containing msgids in English and msgstrs in French: using this file, you can ask the tool to tranlate the .po file to any other language. The first translation helps at disambiguating the very short sentences or part of sentences usually found in .po files.
+For example, you have a .po file with msgids in English and msgstrs in French: using this file, you can ask the tool to translate the .po file into any other language. The first translation helps to disambiguate the very short sentences or parts of sentences that are usually found in .po files.
 
-This can work with OpenAI (provided you have an OpenAI API key) or Anthropic Claude (provided you have an Anthropic AIP key) or Ollama (here, you'll run your Ollama server locally and be able to use any model that Ollama can run - depending obviously on your hardware capabilities, and that for free!).
+If you have an API key for the commercial LLMs, auto-po-lyglot can work with OpenAI, Anthropic Claude, Gemini and Grok.
+Notes: 
+1. Grok is implemented but not tested yet as the Grok API is not yet available in my country.
+2. Claude is implemented in 2 flavors: cached (beta version on Anthropic) or non cached. The cached version uses a longer system prompt because caching only works if the system prompt is more than 1024 tokens long. The big advantage is that the cost of the cached version is much cheaper than the non-cached one.
+It also works with Ollama: You can run your Ollama server locally and be able to use any model that Ollama can run - depending on your hardware capabilities, of course and for free!.
 
 # Install
 
 ## Prerequisite
 * You must have python>=3.10 installed 
-* While not required, it is highly recommended that you create a python virtual env, if you don't already have one, using pipenv or conda or whatever virtual env manager you prefer. eg:
+* While not required, it is highly recommended that you create a python virtual env, if you don't already have one, using pipenv or conda or whatever virtual env manager you prefer. e.g.:
    `conda create -n auto_po_lyglot python=3.10 && conda activate auto_po_lyglot`
 or
    `python -m venv ~/auto_po_lyglot && source ~/auto_po_lyglot/bin/activate`
@@ -25,18 +29,18 @@ or
    `cd auto_po_lyglot && pip install .`
 
 # Configuration
-auto_po_lyglot uses a mix of command line arguments and `.env` file to be as flexible as possible;
+auto_po_lyglot uses a mix of command line arguments and variables in a `.env` file to be as flexible as possible;
 
-Most parameters can be given directly on the command line (if not using the UI version), but you can put in a `.env` file all parameters that don't change very often and use the command line only to override their values when needed.
+Most parameters can be given directly on the command line (if you don't use the UI version), but you can put all the parameters that don't change very often in a `.env` file and use the command line only to override their values when needed.
 
-## `.env` file
+## The `.env` file
 The `.env` file can be created by copying the `.env.example` file to `.env`:
 `cp .env.example .env`
-Then edit the `.env` file and adapt it to your needs. Specifically:
-* choose your default LLM and if you dont want to use the predefined default models for the chosen LLM, specify the model you want to use.
+Then edit the `.env` file to suit your needs. Specifically:
+* select your default LLM and if you do not want to use the predefined default models for the selected LLM, specify the model you want to use.
   Variables are:
-    * `LLM_CLIENT`: possible values are 'ollama', 'openai', 'claude' or 'claude_cached' (claude_cached is advantageous for very big system prompts ie more than 1024 tokens with sonnet)
-    * `LLM_MODEL`: default models are gpt-4o-2024-08-06 for OpenAI, claude-3-5-sonnet-20240620 for claude and claude_cached, llama3.1:8b for ollama.
+    * `LLM_CLIENT`: possible values are 'ollama', 'openai', 'claude' or 'claude_cached' (claude_cached is advantageous for very big system prompts ie more than 1024 tokens with sonnet3.5)
+    * `LLM_MODEL`: default models are GPT 4o (gpt-4o-latest) for OpenAI, Claude Sonnet 3.5 (claude-3-5-sonnet-20240620) for Anthropic (claude and claude_cached), Llama3.1-8B (llama3.1:8b) for Ollama.
     * `TEMPERATURE`: the temperature provided to the LLM. Default is 0.2
   If you choose OpenAI our Claude, you can also put in the .env file the API keys for the LLM:
     * `OPENAI_API_KEY` for OpenAI
@@ -49,7 +53,17 @@ Then edit the `.env` file and adapt it to your needs. Specifically:
   Variables used are `SYSTEM_PROMPT` and `USER_PROMPT`.
 * `LOG_LEVEL` sets the log level (values are DEBUG, INFO, WARNING, ERROR, CRITICAL). This can be overriden on the command line (-v = INFO, -vv = DEBUG)
 * `OLLAMA_BASE_URL`: the URL to access the Ollama server (if used). The default is `http://localhost:11434/v1` for using a local Ollama server. If your server uses a different URL, please specify it here. There is no command line argument to this parameter.
+### Only for the UI
+* `MODELS_PER_LLM`: The list of models to show in the 'Model' select box per LMM. The format is a list of semi-colon separated strings, each string being formated like this <llm>|<comma separated list of models>. The models must the technical name used in the APIs of the LLMs. Example (and default value):
+  ```
+  MODELS=ollama|llama3.1:8b,phi3,gemma2:2b;
+  openai|gpt-4o-mini,chatgpt-4o-latest,gpt-4o,gpt-4-turbo,gpt-4-turbo-preview,gpt-4,gpt-3.5-turbo;
+  claude|claude_cached|claude-3-5-sonnet-20240620,claude-3-opus-20240229,claude-3-sonnet-20240229,claude-3-haiku-20240307;
+  gemini|gemini-1b,gemini-1.5b,gemini-2b,gemini-6b,gemini-12b;
+  grok|grok-1b,grok-1.5b,grok-2b,grok-6b,grok-12b
 
+  ```
+  **IMPORTANT** For readability, the different LLM models are shown each on separate lines but, in the `.env` file, they must all be on the same line! 
 # Run it:
 ## Running with the UI
 > From version 1.3.0

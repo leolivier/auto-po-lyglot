@@ -8,32 +8,51 @@ from auto_po_lyglot import ClientBuilder, ParamsLoader, system_prompt, user_prom
 
 logger = logging.getLogger(__name__)
 
-# TODO: parameterize this using a config file
-# TODO: put the default model first in the lists
 supported_llms = ["openai", "ollama", "claude", "claude_cached", "gemini", "grok"]
-llm_models = {
-  "openai": ["gpt-4o-mini", "chatgpt-4o-latest", "gpt-4o", "gpt-4-turbo", "gpt-4-turbo-preview", "gpt-4",
-             "gpt-3.5-turbo", "gpt-4o-2024-08-06", "gpt-4o-2024-05-13", "gpt-4o-mini-2024-07-18",
-             "gpt-4-turbo-2024-04-09", "gpt-4-0125-preview", "gpt-4-1106-preview"
-             "gpt-4-0613", "gpt-4-0314", "gpt-3.5-turbo-0125", "gpt-3.5-turbo-1106"],
-  "ollama": ["llama3.1:8b", "phi3", "gemma2:2b"],
-  "claude": ["claude-v1", "claude-v1.1"],
-  "claude_cached": ["claude-v1", "claude-v1.1"],
-  "gemini": ["gemini-1b", "gemini-1.5b", "gemini-2b", "gemini-6b", "gemini-12b"],
-  "grok": ["grok-1b", "grok-1.5b", "grok-2b", "grok-6b", "grok-12b"]
-}
+MODELS_PER_LLM = """ollama|llama3.1:8b,phi3,gemma2:2b;
+  openai|gpt-4o-mini,chatgpt-4o-latest,gpt-4o,gpt-4-turbo,gpt-4-turbo-preview,gpt-4,gpt-3.5-turbo;
+  claude|claude_cached|claude-3-5-sonnet-20240620,claude-3-opus-20240229,claude-3-sonnet-20240229,claude-3-haiku-20240307;
+  gemini|gemini-1b,gemini-1.5b,gemini-2b,gemini-6b,gemini-12b;
+  grok|grok-1b,grok-1.5b,grok-2b,grok-6b,grok-12b"""
 
 # The right order is important. The first one is the original language, the second one is the context
 # language supported in examples
 supported_languages = ["English", "French", "Spanish", "Italian", "Portuguese", "German"]
 
 
-def update_models():
-  st.session_state.client_models = llm_models[st.session_state.llm_client]
-
-
 class StParams:
   pass
+
+
+@st.cache_data
+def get_params():
+  """Loads the parameters from the command line and .env file"""
+  params = ParamsLoader().load()
+  return params
+
+
+@st.cache_data
+def get_models():
+  models = {}
+  models_string = os.environ['MODELS_PER_LLM'] if 'MODELS_PER_LLM' in os.environ else MODELS_PER_LLM
+  for model_per_llm in models_string.split(';'):
+    lst = model_per_llm.split('|')
+    llms = lst[:-1]  # all but last elements are llms
+    models_string = lst[-1].split(',')  # last element is a comma separated list of models
+    for llm in llms:
+      llm = llm.strip('\n \t')
+      models[llm] = models_string
+  # print(models)
+  return models
+
+
+def update_models():
+  # print(f'Updating models for "{st.session_state.llm_client}"')
+  try:
+    st.session_state.client_models = st.session_state.models_per_llm[st.session_state.llm_client]
+  except KeyError as e:
+    st.exception(e)
+    st.error(f"Available keys: {st.session_state.models_per_llm}")
 
 
 def init_session_state(params):
@@ -47,8 +66,10 @@ def init_session_state(params):
   ]:
     if key not in st.session_state:
       st.session_state[key] = getattr(params, key)
-  st.session_state.model = st.session_state.model or llm_models[st.session_state.llm_client][0]
-  st.session_state.client_models = llm_models[st.session_state.llm_client]
+
+  st.session_state.models_per_llm = get_models()
+  st.session_state.model = st.session_state.model or st.session_state.models_per_llm[st.session_state.llm_client][0]
+  update_models()
   for api_key in ["open_api_key", "anthropic_api_key", "xai_api_key", "gemini_api_key"]:
     envvar = api_key.upper()
     api_key_value = os.environ.get(envvar, "")
@@ -130,12 +151,6 @@ def build_ui(params):
     if not hasattr(st_params, key):
       setattr(st_params, key, params.__dict__[key])
   return st_params
-
-
-@st.cache_data
-def get_params():
-  """Loads the parameters from the command line and .env file"""
-  return ParamsLoader().load()
 
 
 def streamlit_main():
