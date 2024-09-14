@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from auto_po_lyglot import ParamsLoader
+from auto_po_lyglot import ParamsLoader, ClientBuilder
 # from auto_po_lyglot import process_file
 from .settings import OUTPUT_DIRECTORY, TEST_TRANSLATIONS
 from pathlib import Path
@@ -12,12 +12,12 @@ def params():
   return ParamsLoader([
     {'arg': 'testdir', 'type': str, 'help': 'test directory'},
     {'arg': '-s', 'action': 'store_true', 'help': 'don\'t capture outputs'},
-    ])
+    ]).load()
 
 
 @pytest.fixture(scope="class")
 def llm_client(params):
-    return params.get_client()
+    return ClientBuilder(params).get_client()
 
 
 @pytest.fixture(scope="class")
@@ -41,7 +41,7 @@ def output_file(llm_client):
 #   if not output_file.exists():
 #     print(f"Error: Input file '{output_file}' does not exist.")
 #     sys.exit(1)
-#   languages = [params.original_language, params.context_language] + params.test_target_languages
+#   languages = [params.original_language, params.context_language] + params.target_languages
 #   process_file(output_file, csv_file, languages)
 #   print("CSV extracted to file:", csv_file)
 
@@ -59,9 +59,9 @@ class TestTranspo:
       gentestonly = False
 
     print(f"Using model {llm_client.params.model} for {params.original_language} -> {params.context_language} -> "
-          f"{params.test_target_languages} with an {params.llm_client} client")
+          f"{params.target_languages} with an {params.llm_client} client")
     with output_file.open('w', newline='', encoding='utf-8') as outfile:
-      for target_language in params.test_target_languages:
+      for target_language in params.target_languages:
         llm_client.target_language = target_language
         for tr in TEST_TRANSLATIONS:
           out = f"""  {{
