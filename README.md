@@ -21,17 +21,13 @@ or
 ## Install from sources
 1. Fork the repo:
    `git clone https://github.com/leolivier/transpo.git auto_po_lyglot`
-1. cd to the auto_po_lyglot folder:
-   `cd auto_po_lyglot`
-1. Install the dependencies: 
-   `pip install -r requirements`
-1. check if po_main.py is executable otherwise:
-   `chmod a+x po_main.py`
+1. cd to the auto_po_lyglot folder and install the package and its dependencies: 
+   `cd auto_po_lyglot && pip install .`
 
 # Configuration
 auto_po_lyglot uses a mix of command line arguments and `.env` file to be as flexible as possible;
 
-Most parameters can be given directly on the command line, but you can put in a `.env` file all parameters that don't change very often and use the command line only to override their values when needed.
+Most parameters can be given directly on the command line (if not using the UI version), but you can put in a `.env` file all parameters that don't change very often and use the command line only to override their values when needed.
 
 ## `.env` file
 The `.env` file can be created by copying the `.env.example` file to `.env`:
@@ -52,14 +48,23 @@ Then edit the `.env` file and adapt it to your needs. Specifically:
 * also, this is the place where you can tune the prompt for the LLM. The default ones provided work quite well, but if you can do better, please open a PR and provide your prompt with the LLM on which you tested it and attach the original and translated .po files;
   Variables used are `SYSTEM_PROMPT` and `USER_PROMPT`.
 * `LOG_LEVEL` sets the log level (values are DEBUG, INFO, WARNING, ERROR, CRITICAL). This can be overriden on the command line (-v = INFO, -vv = DEBUG)
+* `OLLAMA_BASE_URL`: the URL to access the Ollama server (if used). The default is `http://localhost:11434/v1` for using a local Ollama server. If your server uses a different URL, please specify it here. There is no command line argument to this parameter.
 
-## Tool arguments
-usage: auto_po_lyglot [-h] [-p] [-l LLM] [-m MODEL] [-t TEMPERATURE] [--original_language ORIGINAL_LANGUAGE] [--context_language CONTEXT_LANGUAGE]
-                      [--target_language TARGET_LANGUAGE] [-i INPUT_PO] [-o OUTPUT_PO] [-v] [-vv]
-Creates a .po translation file based on an existing one using a given model and llm type. It reads the parameters from the command line and completes
-them if necessary from the .env in the same directory. It iterates over the provided target languages, and for each language iterates over the entries
-of the input po file and, using the provided client, model and prompt, translates the original phrase into the target language with the help of the
-context translation.
+# Run it:
+## Running with the UI
+> From version 1.3.0
+
+First create a short python script named `auto_po_lyglot_ui.py` containing these 2 lines:
+```
+from auto_po_lyglot.po_streamlit import streamlit_main
+streamlit_main()
+```
+And run `streamlit run auto_po_lyglot_ui.py`
+Then, you can go to http://localhost:8501 and provide the necessary parameters. Most of them can be initialized based on the content of the .env file. A help button (with a '?') explains what to provide where.
+
+## Running from the Command Line
+**Usage:** `auto_po_lyglot [-h] [-p] [-l LLM] [-m MODEL] [-t TEMPERATURE] [--original_language ORIGINAL_LANGUAGE] [--context_language CONTEXT_LANGUAGE]
+                     [--target_language TARGET_LANGUAGE] [-i INPUT_PO] [-o OUTPUT_PO] [-v] [-vv]`
 
 | option                                 |           can be used to        | supersedes variable in the .env file |  default value |
 |----------------------------------------|---------------------------------|--------------------------------------|----------------|
@@ -76,5 +81,5 @@ context translation.
 |  --context_language CONTEXT_LANGUAGE   | the language of the context translation | CONTEXT_LANGUAGE |  | 
 |  --target_language TARGET_LANGUAGE     | the language into which the original phrase will be translated | TARGET_LANGUAGES (which is an array) |  |
 
-# TO DO
-* Create a small website to submit a po file and get it translated using po_main.py
+# COMING SOON
+* Publishing the streamlit UI to the Streamlit Community Cloud
