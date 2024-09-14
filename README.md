@@ -1,3 +1,21 @@
+> ToC
+* [Goal of this project](#goal-of-this-project)
+* [Install](#install)
+  * [Prerequisite](#prerequisite)
+  * [Install from PyPi](#install-from-pypi)
+  * [Install from sources](#install-from-sources)
+* [Configuration](#configuration)
+  * [The .env file](#the-env-file)
+    * [Only for the UI](#only-for-the-ui)
+* [Run it:](#run-it)
+  * [Running with the UI](#running-with-the-ui)
+    * [Running the UI from the command line](#running-the-ui-from-the-command-line)
+  * [Running from the Command Line](#running-from-the-command-line)
+* [Using Docker](#using-docker)
+  * [Create Docker image](#create-docker-image)
+  * [Running the docker image](#running-the-docker-image)
+* [COMING SOON](#coming-soon)
+
 # Goal of this project
 The goal of this project is to use various LLMs to help translate po files using a first already translated file.
 
@@ -67,7 +85,7 @@ Then edit the `.env` file to suit your needs. Specifically:
 # Run it:
 ## Running with the UI
 > From version 1.3.0
-
+### Running the UI from the command line
 First create a short python script named `auto_po_lyglot_ui.py` containing these 2 lines:
 ```
 from auto_po_lyglot.po_streamlit import streamlit_main
@@ -95,5 +113,33 @@ Then, you can go to http://localhost:8501 and provide the necessary parameters. 
 |  --context_language CONTEXT_LANGUAGE   | the language of the context translation | CONTEXT_LANGUAGE |  | 
 |  --target_language TARGET_LANGUAGE     | the language into which the original phrase will be translated | TARGET_LANGUAGES (which is an array) |  |
 
+# Using Docker
+You can run auto_po_lyglot via Docker. A pre-built up-to-date image can be used at ghcr.io/leolivier/auto_po_lyglot or ypu can build yours.
+## Create Docker image
+If you want to create your own Docker image, create a folder and cd to it then:
+* create a small python script named auto_po_lyglot_ui.py as described for running streamlit from the command line:
+```
+from auto_po_lyglot.po_streamlit import streamlit_main
+streamlit_main()
+```
+* create a file named Dockerfile containing:
+```
+FROM python:3.10-slim
+WORKDIR /app
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN pip install auto-po-lyglot
+COPY ./auto_po_lyglot_ui.py .
+EXPOSE 8501
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+ENTRYPOINT ["streamlit", "run", "auto_po_lyglot_ui.py", "--server.port=8501", "--server.address=0.0.0.0"]
+```
+Then run `docker build -t auto_po_lyglot .` to create your image locally
+
+## Running the docker image
+if you built the image yourself, run:
+`docker run -p 8501:8501 -v ./.env:/app/.env --name auto_po_lyglot auto_po_lyglot:latest`
+If you want to use the pre-built image, run:
+`docker run -p 8501:8501 -v ./.env:/app/.env --name auto_po_lyglot ghcr.io/leolivier/auto_po_lyglot:latest`
+
 # COMING SOON
-* Publishing the streamlit UI to the Streamlit Community Cloud
+* Publishing the streamlit UI to the Streamlit Community Cloud, so that no install is needed at all.
