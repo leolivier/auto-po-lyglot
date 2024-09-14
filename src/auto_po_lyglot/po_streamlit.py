@@ -52,7 +52,7 @@ def init_session_state(params):
   for api_key in ["open_api_key", "anthropic_api_key", "xai_api_key", "gemini_api_key"]:
     envvar = api_key.upper()
     api_key_value = os.environ.get(envvar, "")
-    print(f"api_key: {api_key}, envvar {envvar} = {api_key_value}")
+    # print(f"api_key: {api_key}, envvar {envvar} = {api_key_value}")
     setattr(st.session_state, api_key, api_key_value)
 
 
