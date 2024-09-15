@@ -57,7 +57,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/auto_po_lyglot
+          images: ghcr.io/leolivier/auto_po_lyglot
           tags: 'type=semver,pattern={{version}}'
 
       - name: Build and push
