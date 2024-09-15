@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "auto-po-lyglot"
-version = "1.4.1a3"
+version = "1.4.1"
 #dynamic = ["version"]
 authors = [
   { name="Olivier LEVILLAIN", email="levillain.olivier@gmail.com" },
