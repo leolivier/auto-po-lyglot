@@ -31,6 +31,12 @@ It also works with Ollama: You can run your Ollama server locally and be able to
 
 ## Prerequisite
 * You must have python>=3.10 installed 
+* If you want to work with the source or fork the project, you should install and use [uv](https://docs.astral.sh/uv/) which is a lightning fast replacement for pip, poetry, ... :
+  For installing:
+  ```
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
+  otherwise you'll have to install the dev dependencies  manually.
 * While not required, it is highly recommended that you create a python virtual env, if you don't already have one, using pipenv or conda or whatever virtual env manager you prefer. e.g.:
   ```
   conda create -n auto_po_lyglot python=3.10 && conda activate auto_po_lyglot
@@ -38,6 +44,11 @@ It also works with Ollama: You can run your Ollama server locally and be able to
   or
   ```
   python -m venv ~/auto_po_lyglot && source ~/auto_po_lyglot/bin/activate
+  ```
+  or, if you installed [uv](https://docs.astral.sh/uv/)
+  ```
+  uv venv
+  source .venv/bin/activate
   ```
 
 ## Install from PyPi
@@ -81,8 +92,9 @@ Then edit the `.env` file to suit your needs. Specifically:
   * `ORIGINAL_LANGUAGE` for the language used in msgids
   * `CONTEXT_LANGUAGE` for the langauge used in the 1rst translation
   * `TARGET_LANGUAGES` is a comma separated list of languages in which the .po file must be translated. Usually provide by the command line
-* also, this is the place where you can tune the prompt for the LLM. The default ones provided work quite well, but if you can do better, please open a PR and provide your prompt with the LLM on which you tested it and attach the original and translated .po files;
+* This is also the place where you can tune the prompt for the LLM. The defaults provided work quite well, but if you can do better, please open a PR and provide your prompt with the LLM you tested it on and attach the original and translated .po files;
   Variables used are `SYSTEM_PROMPT` and `USER_PROMPT`.
+* `FUZZY`: if set, will translate fuzzy entries of the PO file too. Default is False. Can be set on the command line with -f or --fuzzy
 * `LOG_LEVEL` sets the log level (values are DEBUG, INFO, WARNING, ERROR, CRITICAL). This can be overriden on the command line (-v = INFO, -vv = DEBUG)
 * `OLLAMA_BASE_URL`: the URL to access the Ollama server (if used). The default is `http://localhost:11434/v1` for using a local Ollama server. If your server uses a different URL, please specify it here. There is no command line argument to this parameter.
 
@@ -100,9 +112,15 @@ Then edit the `.env` file to suit your needs. Specifically:
   ```
   **NOTE**: The different LLM models can be set up each on separate lines.
 
+### Only when translating a whole Django project
+When translating a whole Django project (see below), you can set the folder where your Django project resides locally with:
+```
+PATH=<django project folder>
+```
+
 # Run it:
 ## Running with the UI
-> From version 1.3.0
+> As of version 1.3.0
 ### Running the UI from the command line
 After installing auto_po_lyglot with pip, create a short Python script called `auto_po_lyglot_ui.py` that contains these 2 lines:
 ```
@@ -110,15 +128,15 @@ from auto_po_lyglot.po_streamlit import streamlit_main
 streamlit_main()
 ```
 And run `streamlit run auto_po_lyglot_ui.py`
-Then, you can go to http://localhost:8501 and provide the necessary parameters. Most of them can be initialized based on:
-* the content of the .env file as described above
-* the command line parameters as described below, after a '--' special param that tells streamlit that the following parameters are for auto-po-lyglot e.g.:
+Then you can go to http://localhost:8501 and provide the necessary parameters. Most of them can be initialized based on
+* the contents of the .env file as described above
+* the command line parameters as described below, after a special '--' param telling streamlit that the following parameters are for auto-po-lyglot, e.g. :
 ```
 streamlit run auto_po_lyglot_ui.py -- -l ollama -m phi3 -t 0.5
 ```
 **Note**: The `-o` and `-p` parameters are ignored.
 
-In the UI, a help button (with a '?') explains what parameters to provide where.
+In the UI, a help button (with a '?') explains which parameters to specify where.
 
 ## Running from the Command Line
 **Usage:** `auto_po_lyglot [-h] [-p] [-l LLM] [-m MODEL] [-t TEMPERATURE] [--original_language ORIGINAL_LANGUAGE] [--context_language CONTEXT_LANGUAGE]
@@ -130,20 +148,31 @@ In the UI, a help button (with a '?') explains what parameters to provide where.
 |  -v, --verbose                         | verbose mode                    |       LOG_LEVEL=INFO                 | LOG_LEVEL=WARN |
 |  -vv, --debug                          | debug mode                      |       LOG_LEVEL=DEBUG                | LOG_LEVEL=WARN |
 |  -p, --show_prompts                    | show the prompts used for translation and exits |                      |                |
+|  -f, --force                           | Forces translating already translated entries   | FORCE                | False (i.e; non blank entries in the output file won't be overwritten) |
+|  --fuzzy                               | Translates fuzzy entries in the input po file   | FUZZY                | False (fuzzy entries are ignored) |
 |  -i, --input_po INPUT_PO               | the .po file containing the msgids (phrases to be translated) and msgstrs (context translations) | INPUT_PO | |
-|  -o, --output_po OUTPUT_PO             | the .po file where the translated results will be written. If not provided, it will be created in the same directory as the input_po except if the input po file has the specific format .../locale/<context language code>/LC_MESSAGES/\<input po file name>. In this case, the output po file will be created as .../locale/\<target language code>/LC_MESSAGES/\<input po file name>. | OUTPUT_PO | see doc |
-|  -l, --llm LLM                         | Le type of LLM you want to use. Can be openai, ollama, claude or claude_cached. For openai or claude[_cached], you need to set the proper api key in the environment or in the .env file | LLM_CLIENT | ollama |
-|  -m, --model MODEL                     | the name of the model to use. If not provided, a default model will be used, based on the chosen client | LLM_MODEL | see doc |
-|  -t, --temperature TEMPERATURE         | the temperature of the model. If not provided at all, a default value of 0.2 will be used | TEMPERATURE |  0.2  |
+|  -o, --output_po OUTPUT_PO             | is the .po file where the translated results will be written. If not specified, it will be created in the same directory as input_po unless the input po file has the specific format .../locale/<context language code>/LC_MESSAGES/\<input po file name>. In this case, the output po file will be created as .../locale/\<target language code>/LC_MESSAGES/\<input po file name>. | OUTPUT_PO | see doc |
+|  -l, --llm LLM                         | the type of LLM you want to use. Can be openai, ollama, claude or claude_cached. For openai or claude[_cached], you need to set the proper api key in the environment or in the .env file | LLM_CLIENT | ollama |
+|  -m, --model MODEL                     | the name of the model to use. If not specified, a default model will be used, based on the chosen client | LLM_MODEL | see doc |
+|  -t, --temperature TEMPERATURE         | the temperature of the model. If not specified at all, a default value of 0.2 will be used | TEMPERATURE |  0.2  |
 |  --original_language ORIGINAL_LANGUAGE | the language of the original phrase | ORIGINAL_LANGUAGE |  |
 |  --context_language CONTEXT_LANGUAGE   | the language of the context translation | CONTEXT_LANGUAGE |  | 
 |  --target_language TARGET_LANGUAGE     | the language into which the original phrase will be translated | TARGET_LANGUAGES (which is an array) |  |
+| --owner OWNER | The owner of the project containing the po file. This is used only in the header of the translated file | OWNER | \<OWNER\> |
+| --owner_mail | Email of the above owner. This is used only in the header of the translated file | OWNER_MAIL | \<OWNER EMAIL\> |
+
+## Translate a whole Django project at once
+If you use `auto_djangopo_lyglot` instead of `auto_po_lyglot`, you can translate a whole Django project in one run. 
+Just set the variables or parameters as described above (except of course the -i and -o parameters which are ignored as well as their .env counterparts). 
+The only optional additional parameter is --path (or the PATH variable in the .env file) which specifies the path to the Django project you want translate.
+The tool will automatically detect all po files associated with the context language and use them to translate the original sentences into the target language(s), storing the resulting files in the right place in the Django structure. 
+**NOTE**: If you use the -c or --compile option, the files will be compiled, so you don't need to run `python manage.py compilemessages`. 
 
 # Using Docker
-> From version 1.4.0
+> As of version 1.4.0
 
-You can run auto_po_lyglot via Docker. A pre-built up-to-date image can be used at ghcr.io/leolivier/auto_po_lyglot or you can build yours.
-## Create Docker image
+You can run auto_po_lyglot via Docker. A pre-built up-to-date image can be used at ghcr.io/leolivier/auto_po_lyglot or you can build your own.
+## Creating a Docker image
 If you want to create your own Docker image, create a folder and cd to it then:
 * create a small Python script called auto_po_lyglot_ui.py as described for running Streamlit from the command line:
 ```
@@ -163,8 +192,8 @@ ENTRYPOINT ["streamlit", "run", "auto_po_lyglot_ui.py", "--server.port=8501", "-
 ```
 Then run `docker build -t auto_po_lyglot .` to create your image locally
 
-## Running the docker image
-if you built the image yourself, run:
+## Running the Docker image
+If you built the image yourself, run:
 ```
 docker run -p 8501:8501 -v ./.env:/app/.env --name auto_po_lyglot auto_po_lyglot:latest
 ```
