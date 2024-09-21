@@ -5,6 +5,8 @@ from .clients.claude_client import ClaudeClient, CachedClaudeClient
 from .clients.client_base import AutoPoLyglotClient
 from .clients.gemini_client import GeminiClient
 from .default_prompts import system_prompt, user_prompt
+from .django_po import locate_django_translation_files
+
 __all__ = [
   'ParamsLoader',
   'ClientBuilder',
@@ -18,4 +20,6 @@ __all__ = [
   'AutoPoLyglotClient',
   'system_prompt',
   'user_prompt',
-  'extract_csv']
+  'extract_csv',
+  'locate_django_translation_files'
+]

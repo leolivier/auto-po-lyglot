@@ -59,7 +59,7 @@ the context translation."""
   def parse_args(self):
     parser = argparse.ArgumentParser(description=self.parser_description)
     # Add arguments
-    parser.add_argument('-p', '--show_prompts',
+    parser.add_argument('-p', '--show-prompts',
                         action='store_true',
                         help='show the prompts used for translation and exits')
     parser.add_argument('-l', '--llm',
@@ -76,21 +76,21 @@ the context translation."""
                         type=float,
                         help='the temperature of the model. Supersedes TEMPERATURE in .env. If not provided at all, '
                              'a default value of 0.2 will be used')
-    parser.add_argument('--original_language',
+    parser.add_argument('--original-language',
                         type=str,
                         help='the language of the original phrase. Supersedes ORIGINAL_LANGUAGE in .env. ')
-    parser.add_argument('--context_language',
+    parser.add_argument('--context-language',
                         type=str,
                         help='the language of the context translation. Supersedes CONTEXT_LANGUAGE in .env. ')
-    parser.add_argument('--target_language',
+    parser.add_argument('--target-language',
                         type=str,
                         help='the language into which the original phrase will be translated. Supersedes '
                              'TARGET_LANGUAGE in .env. ')
-    parser.add_argument('-i', '--input_po',
+    parser.add_argument('-i', '--input-po',
                         type=str,
                         help='the .po file containing the msgids (phrases to be translated) '
-                              'and msgstrs (context translations). Supersedes INPUT_PO in .env.')
-    parser.add_argument('-o', '--output_po',
+                             'and msgstrs (context translations). Supersedes INPUT_PO in .env.')
+    parser.add_argument('-o', '--output-po',
                         type=str,
                         help='the .po file where the translated results will be written. If not provided, '
                              'it will be created in the same directory as the input_po except if the input po file has '
@@ -98,20 +98,55 @@ the context translation."""
                              'In this case, the output po file will be created as '
                              '.../locale/<target language code>/LC_MESSAGES/<input po file name>. Supersedes '
                              'OUTPUT_PO in .env.')
+    parser.add_argument('-f', '--force',
+                        action='store_true',
+                        help='Forces translating already translated entries. Supersedes FORCE in .env. Default is False')
+    parser.add_argument('-c', '--compile',
+                        action='store_true',
+                        help='Compiles the output po file to an mo file. Supersedes COMPILE in .env. Default is False')
+    parser.add_argument('--fuzzy',
+                        action='store_true',
+                        help='Translates fuzzy entries in the input po file. Supersedes FUZZY in .env. Default is False')
+    parser.add_argument('--owner',
+                        type=str,
+                        help='Owner of the project. Supersersedes OWNER in .env. Default is <OWNER>')
+    parser.add_argument('--owner_mail',
+                        type=str,
+                        help='Email of the owner. Supersersedes OWNER_MAIL in .env. Default is <OWNER EMAIL>')
 
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode. Equivalent to LOG_LEVEL=INFO in .env')
     parser.add_argument('-vv', '--debug', action='store_true', help='debug mode. Equivalent to LOG_LEVEL=DEBUG in .env')
     if self.additional_args:
       for arg in self.additional_args:
         if arg.get('action'):
-          parser.add_argument(arg.get('arg'), action=arg.get('action'), help=arg.get('help'))
+          parser.add_argument(
+              *(arg.get('arg') if isinstance(arg.get('arg'), list) else [arg.get('arg')]),
+              action=arg.get('action'),
+              help=arg.get('help')
+          )
         else:
-          parser.add_argument(arg.get('arg'), type=arg.get('type'), help=arg.get('help'))
+          parser.add_argument(
+            *(arg.get('arg') if isinstance(arg.get('arg'), list) else [arg.get('arg')]),
+            type=arg.get('type'),
+            help=arg.get('help')
+          )
 
     # Analyze the arguments
     return parser.parse_args()
 
   def __init__(self, additional_args=None):
+    """
+    additional_args is a list of dictionaries where each dictionary represents an additional argument that can be given to
+    the script. Each dictionary must contain the following key:
+    - arg: the argument itself (e.g. '--foo' or '-f') or an array of arguments (e.g. ['-'f', '--foo'])
+    - help: the help message associated to the argument
+    Each dictionary can contain the following keys:
+    - type: the type of the argument (e.g. str, int, float)
+    or
+    - action: the action associated to the argument (e.g. 'store_true')
+    - env: the environment variable associated to the argument (e.g. 'FOO')
+    - default: the default value of the argument (e.g. 'bar')
+    """
     self.additional_args = additional_args
 
   def load(self):
@@ -165,14 +200,26 @@ the context translation."""
     params.input_po = args.input_po or environ.get('INPUT_PO', None)
     params.output_po = args.output_po or environ.get('OUTPUT_PO', None)
 
+    params.fuzzy = args.fuzzy or environ.get('FUZZY', False)
+    params.force = args.force or environ.get('FORCE', False)
+    params.compile = args.compile or environ.get('COMPILE', False)
+
+    params.owner = args.owner or environ.get('OWNER', '<OWNER>')
+    params.owner_mail = args.owner_mail or environ.get('OWNER_MAIL', '<OWNER EMAIL>')
+
     # generic processing of additional arguments
     if self.additional_args:
       for argument in self.additional_args:
         arg = argument.get('arg')
-        while arg.startswith('-'):
-          arg = arg[1:]
-        val = getattr(args, arg) or environ.get(argument.get('env', 'UNDEFINED_VARIABLE'), argument.get('default', None))
-        setattr(params, arg, val)
+        if isinstance(arg, list):
+          arg_ns = [arg_n for arg_n in arg if arg_n.startswith('--')]
+          # tries to take the 1rst param starting with -- otherwise takes the 1rst param
+          arg_name = arg_ns[0] if len(arg_ns) > 0 else arg[0]
+        else:
+          arg_name = arg
+        arg_name = arg_name.lstrip('-').lower().replace('-', '_')
+        val = getattr(args, arg_name) or environ.get(argument.get('env', 'UNDEFINED_VARIABLE'), argument.get('default', None))
+        setattr(params, arg_name, val)
 
     logger.info(f"Loaded Params: {params.__dict__}")
     return params

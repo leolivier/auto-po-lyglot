@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 import logging
-import polib
 from pathlib import Path
-from time import sleep
 
 from . import ClientBuilder, ParamsLoader, get_outfile_name, system_prompt, user_prompt
 
@@ -43,34 +41,9 @@ def main():
       # Load input .po file
       assert params.input_po, "Input .po file not provided"
       assert Path(params.input_po).exists(), f"Input .po file {params.input_po} does not exist"
-      po = polib.pofile(params.input_po)
-      try:
-        nb_translations = 0
-        for entry in po:
-          if entry.msgid and not entry.fuzzy:
-            context_translation = entry.msgstr if entry.msgstr else entry.msgid
-            original_phrase = entry.msgid
-            translation, explanation = client.translate(original_phrase, context_translation)
-            # Add explanation to comment
-            if explanation:
-              entry.comment = explanation
-            # Update translation
-            entry.msgstr = translation
-            logger.info(f"""==================
-  {params.original_language}: "{original_phrase}"
-  {params.context_language}: "{context_translation}"
-  {target_language}: "{translation}"
-  Comment:{explanation if explanation else ''}
-  """)
-            sleep(1.0)  # Sleep for 1 second to avoid rate limiting
-            nb_translations += 1
-      except Exception as e:
-        logger.error(f"Error: {e}")
-      # Save the new .po file even if there was an error to not lose what was translated
-      po.save(output_file)
-      percent_translated = round(nb_translations / len(po) * 100, 2)
-      logger.info(f"Saved {output_file}, translated {nb_translations} entries out "
-                  f"of {len(po)} entries ({percent_translated}%)")
+      client.translate_pofile(params.input_po, output_file)
+
+    logger.info("Done!")
 
 
 if __name__ == "__main__":
