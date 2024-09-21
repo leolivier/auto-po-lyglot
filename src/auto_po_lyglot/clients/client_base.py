@@ -1,5 +1,11 @@
 from abc import ABC, abstractmethod
 import logging
+from pathlib import Path
+import polib
+from time import sleep
+from datetime import datetime
+
+from auto_po_lyglot.getenv import get_language_code
 from ..default_prompts import (
   system_prompt as default_system_prompt,
   additional_system_prompt,
@@ -7,6 +13,7 @@ from ..default_prompts import (
   po_placeholder_examples,
   basic_examples,
   ambiguous_examples,
+  html_markers_examples,
   additional_system_prompt_examples,
 )
 
@@ -49,81 +56,119 @@ class AutoPoLyglotClient(ABC):
     """
     ...
 
-  def get_system_prompt(self):
-    format = self.params.system_prompt or default_system_prompt
-    if self.use_large_system_prompt:
-      format += '\n\nAdditional system prompt examples:\n'
-      i = 1
-      for example in additional_system_prompt_examples:
-        params = {
-          'original_language': self.params.original_language,
-          'context_language': self.params.context_language,
-          'target_language': self.target_language,
-          'original_phrase': example[self.params.original_language],
-          'context_translation': example[self.params.context_language],
-          'target_translation': example[self.target_language],
-        }
-        format += f'Example #{i}:\n{additional_system_prompt.format(**params)}\n'
-        i += 1
-    logger.debug("system prompt format: ", format)
-    # print("default system prompt format: ", default_system_prompt)
-    try:
-      basic_exemple = basic_examples[0]
-      assert self.params.original_language in basic_exemple
-      assert self.params.context_language in basic_exemple
-      assert self.target_language in basic_exemple
-      simple_original_phrase = basic_exemple[self.params.original_language]
-      simple_context_translation = basic_exemple[self.params.context_language]
-      simple_target_translation = basic_exemple[self.target_language]
-      for ambiguous_example in ambiguous_examples:
-        if ambiguous_example['original_language'] == self.params.original_language and \
-           ambiguous_example['context_language'] == self.params.context_language:
-          assert self.params.original_language in ambiguous_example
-          assert self.params.context_language in ambiguous_example
-          assert self.target_language in ambiguous_example
-          ambiguous_original_phrase = ambiguous_example[self.params.original_language]
-          ambiguous_context_translation = ambiguous_example[self.params.context_language]
-          ambiguous_target_translation = ambiguous_example[self.target_language]
-          ambiguous_explanation = ambiguous_example['explanation']
-          ambiguous_target_translation = ambiguous_example[self.target_language]
-          break
-      if ambiguous_original_phrase is None:
-        raise PoLyglotException("ambiguous_examples.py does not contain an ambiguous example for these languages")
-
-      # PO placeholders
-      assert len(po_placeholder_examples) == 3
-      for po_placeholder_example in po_placeholder_examples:
-        assert self.params.original_language in po_placeholder_example
-        assert self.params.context_language in po_placeholder_example
-        assert self.target_language in po_placeholder_example
-
-      prompt_params = {
+  def _get_languages(self):
+    return {
         "original_language": self.params.original_language,
         "context_language": self.params.context_language,
         "target_language": self.target_language,
-        "simple_original_phrase": simple_original_phrase,
-        "simple_context_translation": simple_context_translation,
-        "simple_target_translation": simple_target_translation,
-        "ambiguous_original_phrase": ambiguous_original_phrase,
-        "ambiguous_context_translation": ambiguous_context_translation,
-        "ambiguous_target_translation": ambiguous_target_translation,
-        "po_placeholder_original_phrase_1": po_placeholder_examples[0][self.params.original_language],
-        "po_placeholder_context_translation_1": po_placeholder_examples[0][self.params.context_language],
-        "po_placeholder_target_translation_1": po_placeholder_examples[0][self.target_language],
-        "po_placeholder_original_phrase_2": po_placeholder_examples[1][self.params.original_language],
-        "po_placeholder_context_translation_2": po_placeholder_examples[1][self.params.context_language],
-        "po_placeholder_target_translation_2": po_placeholder_examples[1][self.target_language],
-        "po_placeholder_original_phrase_3": po_placeholder_examples[2][self.params.original_language],
-        "po_placeholder_context_translation_3": po_placeholder_examples[2][self.params.context_language],
-        "po_placeholder_target_translation_3": po_placeholder_examples[2][self.target_language],
+    }
+
+  def _get_additional_system_prompt(self):
+    additional_format = '\n\nAdditional system prompt examples:\n'
+    i = 1
+    for example in additional_system_prompt_examples:
+      params = {
+        'original_language': self.params.original_language,
+        'context_language': self.params.context_language,
+        'target_language': self.target_language,
+        'original_phrase': example[self.params.original_language],
+        'context_translation': example[self.params.context_language],
+        'target_translation': example[self.target_language],
       }
+      additional_format += f'Example #{i}:\n{additional_system_prompt.format(**params)}\n'
+      i += 1
+    return additional_format
+
+  def _get_basic_examples(self):
+    basic_exemple = basic_examples[0]
+    assert self.params.original_language in basic_exemple
+    assert self.params.context_language in basic_exemple
+    assert self.target_language in basic_exemple
+    return {
+      "simple_original_phrase": basic_exemple[self.params.original_language],
+      "simple_context_translation": basic_exemple[self.params.context_language],
+      "simple_target_translation": basic_exemple[self.target_language],
+    }
+
+  def _get_ambiguous_examples(self):
+    for ambiguous_example in ambiguous_examples:
+      if ambiguous_example['original_language'] == self.params.original_language and \
+          ambiguous_example['context_language'] == self.params.context_language:
+        assert self.params.original_language in ambiguous_example
+        assert self.params.context_language in ambiguous_example
+        assert self.target_language in ambiguous_example
+        ambiguous_original_phrase = ambiguous_example[self.params.original_language]
+        ambiguous_context_translation = ambiguous_example[self.params.context_language]
+        ambiguous_target_translation = ambiguous_example[self.target_language]
+        ambiguous_target_translation = ambiguous_example[self.target_language]
+        ambiguous_explanation = ambiguous_example['explanation']
+        break
+    if ambiguous_original_phrase is None:
+      raise PoLyglotException("ambiguous_examples.py does not contain an ambiguous example for these languages")
+
+    return {
+      "ambiguous_original_phrase": ambiguous_original_phrase,
+      "ambiguous_context_translation": ambiguous_context_translation,
+      "ambiguous_target_translation": ambiguous_target_translation,
+      "ambiguous_explanation": ambiguous_explanation
+    }
+
+  def _get_po_placeholder_examples(self):
+    assert len(po_placeholder_examples) == 3
+    for po_placeholder_example in po_placeholder_examples:
+      assert self.params.original_language in po_placeholder_example
+      assert self.params.context_language in po_placeholder_example
+      assert self.target_language in po_placeholder_example
+    return {
+      "po_placeholder_original_phrase_1": po_placeholder_examples[0][self.params.original_language],
+      "po_placeholder_context_translation_1": po_placeholder_examples[0][self.params.context_language],
+      "po_placeholder_target_translation_1": po_placeholder_examples[0][self.target_language],
+      "po_placeholder_original_phrase_2": po_placeholder_examples[1][self.params.original_language],
+      "po_placeholder_context_translation_2": po_placeholder_examples[1][self.params.context_language],
+      "po_placeholder_target_translation_2": po_placeholder_examples[1][self.target_language],
+      "po_placeholder_original_phrase_3": po_placeholder_examples[2][self.params.original_language],
+      "po_placeholder_context_translation_3": po_placeholder_examples[2][self.params.context_language],
+      "po_placeholder_target_translation_3": po_placeholder_examples[2][self.target_language],
+
+    }
+
+  def _get_html_markers_examples(self):
+    assert len(html_markers_examples) == 2
+    for html_markers_example in html_markers_examples:
+      assert self.params.original_language in html_markers_example
+      assert self.params.context_language in html_markers_example
+      assert self.target_language in html_markers_example
+    return {
+      "html_original_phrase_1": html_markers_examples[0][self.params.original_language],
+      "html_context_translation_1": html_markers_examples[0][self.params.context_language],
+      "html_target_translation_1": html_markers_examples[0][self.target_language],
+      "html_original_phrase_2": html_markers_examples[1][self.params.original_language],
+      "html_context_translation_2": html_markers_examples[1][self.params.context_language],
+      "html_target_translation_2": html_markers_examples[1][self.target_language],
+    }
+
+  def _get_ambiguous_explanation(self, params):
+    # format the explanation using the already defined parameters
+    explanation_params = params.copy()
+    explanation_params["target_translation"] = params['ambiguous_target_translation']
+    return {"ambiguous_explanation": params['ambiguous_explanation'].format(**explanation_params)}
+
+  def get_system_prompt(self):
+    format = self.params.system_prompt or default_system_prompt
+    if self.use_large_system_prompt:
+      format += self._get_additional_system_prompt()
+    logger.debug("system prompt format: ", format)
+    # print("default system prompt format: ", default_system_prompt)
+    try:
+      prompt_params = self._get_languages()
+      prompt_params.update(self._get_basic_examples())
+      prompt_params.update(self._get_ambiguous_examples())
+      prompt_params.update(self._get_po_placeholder_examples())
+      prompt_params.update(self._get_html_markers_examples())
+      prompt_params.update(self._get_ambiguous_explanation(prompt_params))
     except KeyError as e:
       raise PoLyglotException(f"examples.py does not contain an example for these piece: {str(e)}")
 
-    # first format the explanation then add it to the params before formatting the prompt
-    explanation_params = prompt_params.copy()
-    explanation_params["target_translation"] = ambiguous_target_translation
-    prompt_params["ambiguous_explanation"] = ambiguous_explanation.format(**explanation_params)
     system_prompt = format.format(**prompt_params)
     if self.first:
       logger.info(f"First system prompt:\n{system_prompt}")
@@ -163,3 +208,61 @@ class AutoPoLyglotClient(ABC):
       user_prompt = self.get_user_prompt(phrase, context_translation)
       raw_result = self.get_translation(system_prompt, user_prompt)
       return self.process_translation(raw_result)
+
+  def translate_pofile(self, input_file, output_file):
+    logger.info(f"Translating {input_file} to {self.target_language} in {output_file}")
+    input_path = Path(input_file)
+    app_name = input_path.parents[4].name.capitalize()
+    po = polib.pofile(input_file)
+    out_po = polib.pofile(output_file) if Path(output_file).exists() else None
+    po.header = f"""{self.target_language} Translations for {app_name} app.
+Copyright (C) {datetime.now().year} {self.params.owner}
+This file is distributed under the same license as the application.
+This file was generated from {input_file} by [Auto-po-lyglot](https://github.com/leolivier/auto-po-lyglot)
+using the {self.params.model} model. Depending on the model, it may contain some errors and should be reviewed
+by a human translator. Also depending on the model, each translation can be preceded by an explanation provided
+by the model.
+{self.params.owner} {self.params.owner_mail}, {datetime.now().year}.
+"""
+    po.metadata['Last-Translator'] = f'Auto-po-lyglot using {self.params.model} (https://github.com/leolivier/auto-po-lyglot)'
+    po.metadata['Language'] = get_language_code(self.target_language).upper()
+    po.metadata['PO-Revision-Date'] = f"{datetime.now():%Y-%m-%d %H:%M+00:00}\n"  # "2024-08-07 20:09+0200""
+
+    try:
+      nb_translations = 0
+      already_translated = 0
+      for entry in po:
+        if entry.msgid and (self.params.fuzzy or not entry.fuzzy):
+
+          # don't translate again the existing translations
+          if out_po:
+            out_entry = out_po.find(entry.msgid)
+            if out_entry and out_entry.msgstr != "":
+              entry.msgstr = out_entry.msgstr
+              already_translated += 1
+              continue
+
+          context_translation = entry.msgstr if entry.msgstr else entry.msgid
+          original_phrase = entry.msgid
+          translation, explanation = self.translate(original_phrase, context_translation)
+          # Add explanation to comment
+          if explanation:
+            entry.comment = explanation
+          # Update translation
+          entry.msgstr = translation
+          logger.info(f"""==================
+  {self.params.original_language}: "{original_phrase}"
+  {self.params.context_language}: "{context_translation}"
+  {self.target_language}: "{translation}"
+  Comment:{explanation if explanation else ''}
+  """)
+          sleep(1.0)  # Sleep for 1 second to avoid rate limiting
+          nb_translations += 1
+    except Exception as e:
+      logger.error(f"Error: {e}")
+    # Save the new .po file even if there was an error to not lose what was translated
+    po.save(output_file)
+    percent_translated = round(nb_translations / (len(po)-already_translated) * 100, 2)
+    logger.info(f"Saved {output_file}, translated {nb_translations} entries out "
+                f"of {len(po)} entries, with {already_translated} entries already translated and not taken into account "
+                f"({percent_translated}%)")

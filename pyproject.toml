@@ -47,6 +47,7 @@ packages = ["src/auto_po_lyglot"]
 
 [project.scripts]
 auto_po_lyglot = "auto_po_lyglot.po_main:main"
+auto_djangopo_lyglot = "auto_po_lyglot.po_django_main:main"
 
 [tool.hatch.build.targets.wheel.force-include]
 "src" = "auto_po_lyglot"
