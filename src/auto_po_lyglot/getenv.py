@@ -89,7 +89,7 @@ the context translation."""
     parser.add_argument('-i', '--input-po',
                         type=str,
                         help='the .po file containing the msgids (phrases to be translated) '
-                              'and msgstrs (context translations). Supersedes INPUT_PO in .env.')
+                             'and msgstrs (context translations). Supersedes INPUT_PO in .env.')
     parser.add_argument('-o', '--output-po',
                         type=str,
                         help='the .po file where the translated results will be written. If not provided, '
@@ -98,9 +98,21 @@ the context translation."""
                              'In this case, the output po file will be created as '
                              '.../locale/<target language code>/LC_MESSAGES/<input po file name>. Supersedes '
                              'OUTPUT_PO in .env.')
-    parser.add_argument('-f', '--fuzzy',
+    parser.add_argument('-f', '--force',
                         action='store_true',
-                        help='Translates fuzzy entries in the input po file. Supersedes FUZZY in .env. Default is false')
+                        help='Forces translating already translated entries. Supersedes FORCE in .env. Default is False')
+    parser.add_argument('-c', '--compile',
+                        action='store_true',
+                        help='Compiles the output po file to an mo file. Supersedes COMPILE in .env. Default is False')
+    parser.add_argument('--fuzzy',
+                        action='store_true',
+                        help='Translates fuzzy entries in the input po file. Supersedes FUZZY in .env. Default is False')
+    parser.add_argument('--owner',
+                        type=str,
+                        help='Owner of the project. Supersersedes OWNER in .env. Default is <OWNER>')
+    parser.add_argument('--owner_mail',
+                        type=str,
+                        help='Email of the owner. Supersersedes OWNER_MAIL in .env. Default is <OWNER EMAIL>')
 
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode. Equivalent to LOG_LEVEL=INFO in .env')
     parser.add_argument('-vv', '--debug', action='store_true', help='debug mode. Equivalent to LOG_LEVEL=DEBUG in .env')
@@ -189,6 +201,11 @@ the context translation."""
     params.output_po = args.output_po or environ.get('OUTPUT_PO', None)
 
     params.fuzzy = args.fuzzy or environ.get('FUZZY', False)
+    params.force = args.force or environ.get('FORCE', False)
+    params.compile = args.compile or environ.get('COMPILE', False)
+
+    params.owner = args.owner or environ.get('OWNER', '<OWNER>')
+    params.owner_mail = args.owner_mail or environ.get('OWNER_MAIL', '<OWNER EMAIL>')
 
     # generic processing of additional arguments
     if self.additional_args:

@@ -29,16 +29,6 @@ def main():
        'help': 'Path to the Django project directory. Default is the current directory',
        'env': 'PATH',
        'default': '.'},
-      {'arg': '--owner',
-       'type': str,
-       'help': 'Owner of the project. Supersersedes OWNER in .env. Default is <OWNER>',
-       'env': 'OWNER',
-       'default': '<OWNER>'},
-      {'arg': '--owner_mail',
-       'type': str,
-       'help': 'Email of the owner. Supersersedes OWNER_MAIL in .env. Default is <OWNER EMAIL>',
-       'env': 'OWNER_MAIL',
-       'default': '<OWNER EMAIL>'},
     ]).load()
 
     if params.show_prompts:

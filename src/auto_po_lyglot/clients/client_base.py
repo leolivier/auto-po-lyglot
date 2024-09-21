@@ -234,10 +234,10 @@ by the model.
       for entry in po:
         if entry.msgid and (self.params.fuzzy or not entry.fuzzy):
 
-          # don't translate again the existing translations
+          # don't translate again the existing translations except if forced
           if out_po:
             out_entry = out_po.find(entry.msgid)
-            if out_entry and out_entry.msgstr != "":
+            if out_entry and out_entry.msgstr != "" and not self.params.force:
               entry.msgstr = out_entry.msgstr
               already_translated += 1
               continue
@@ -262,6 +262,10 @@ by the model.
       logger.error(f"Error: {e}")
     # Save the new .po file even if there was an error to not lose what was translated
     po.save(output_file)
+    if self.params.compile:
+      logger.info(f"Compiling {output_file}")
+      mo_output_file = Path(output_file).with_suffix('.mo')
+      po.save_as_mofile(mo_output_file)
     percent_translated = round(nb_translations / (len(po)-already_translated) * 100, 2)
     logger.info(f"Saved {output_file}, translated {nb_translations} entries out "
                 f"of {len(po)} entries, with {already_translated} entries already translated and not taken into account "
