@@ -16,7 +16,8 @@ The user input will have the following format:
 Please respond only with the best translation you find for the {original_language} sentence, surrounded by double quotes and
 with absolutely no words before it.
 Would you need to provide an explanation of the translation, please write it in {original_language}, but only after giving
-the best translation and write the explanation on a new line.
+the best translation and write the explanation on a new line. Please never add a comment like "Let me know if you have any other sentences to translate!"
+in your answer as this will be used in a machine to machine environment.
 For example, if you would receive as user input this simple translation:
 ```
 {original_language}: "{simple_original_phrase}", {context_language} translation: "{simple_context_translation}"
@@ -35,13 +36,13 @@ and your output would be, assuming an explanation is needed:
 "{ambiguous_target_translation}"
 {ambiguous_explanation}
 ```
-Also, sometimes, the sentence to be translated and its context translation will contain placheholders that you are not allowed
-to translate and must keep in the same place in your translation. The placeholders can be identified with the following Python
-regex: r'{{[^}}]*}}|%%[sd]|%%\([^)]*\)s'.
-Placeholders must be placed in the same semantic location in your translation as in the original sentence and in the contextual
-translation. Sometimes, the name of the placeholders can be relevant for understanding the sentence so you can use them to
-understand the contex but it is very important that you do not translate them and you keep them in the right place in your
-translation. For instance, this input:
+Also, sometimes, the sentence to be translated and its context translation will contain placheholders or HTML markers that you
+are not allowed to translate and must keep in the same place in your translation. The placeholders can be identified with the
+following Python regex: r'{{[^}}]*}}|%%[sd]|%%\([^)]*\)s' and the HTML markers with the following Python regex: r'<[^>]*>'.
+Placeholders as well as HYML markers must be placed in the same semantic location in your translation as in the original sentence
+and in the contextual translation. Sometimes, the name of the placeholders can be relevant for understanding the sentence so you
+can use them to understand the contex but it is very important that you do not translate them and you keep them in the right place
+in your translation. For instance, this input:
 ```
 {original_language} sentence: "{po_placeholder_original_phrase_1}", {context_language} translation: "{po_placeholder_context_translation_1}"
 ```
@@ -64,6 +65,21 @@ Yet another format:
 would be translated in {target_language} into:
 ```
 "{po_placeholder_target_translation_3}"
+```
+Two examples with HTML markers:
+```
+{original_language} sentence: "{html_original_phrase_1}", {context_language} translation: "{html_context_translation_1}"
+```
+and your output in {target_language} would be:
+```
+"{html_target_translation_1}"
+```
+```
+{original_language} sentence: "{html_original_phrase_2}", {context_language} translation: "{html_context_translation_2}"
+```
+and your output in {target_language} would be:
+```
+"{html_target_translation_2}"
 ```
 """  # noqa
 
@@ -190,6 +206,24 @@ po_placeholder_examples = [
   },
 ]
 
+html_markers_examples = [
+  {
+    "English": "<h1>Hello</h1>",
+    "French": "<h1>Bonjour</h1>",
+    "Italian": "<h1>Ciao</h1>",
+    "Spanish": "<h1>Hola</h1>",
+    "German": "<h1>Hallo</h1>",
+    "Portuguese": "<h1>Ola</h1>"
+  },
+  {
+    "English": "<p>Goodbye <a href='https://example.com'>my friend</a></p>",
+    "French": "<p>Au revoir, <a href='https://example.com'>mon ami</a></p>",
+    "Italian": "<p>Arrivederci <a href='https://example.com'>mi amico</a></p>",
+    "Spanish": "<p>Adios <a href='https://example.com'>mi amigo</a></p>",
+    "German": "<p>Auf Wiedersehen <a href='https://example.com'>mein Freund</a></p>",
+    "Portuguese": "<p>Tchau <a href='https://example.com'>meu amigo</a></p>"
+  },
+]
 # ========= ADDITIONAL EXAMPLES =============================================================
 # Additional examples is a list of translations in different languages for the same simple phrase.
 # These examples are used to fill the additional_system_prompt placeholder in the system prompt.
