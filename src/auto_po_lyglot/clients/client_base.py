@@ -212,8 +212,12 @@ class AutoPoLyglotClient(ABC):
   def translate_pofile(self, input_file, output_file):
     logger.info(f"Translating {input_file} to {self.target_language} in {output_file}")
     input_path = Path(input_file)
-    app_name = input_path.parents[4].name.capitalize()
-    wr_input_file = '/'.join(input_path.parts[-6:])  # don't keep the beginning of the file name to put in the header
+    if str(input_path.parents[1]) == 'LC_MESSAGES':
+      app_name = input_path.parents[4].name.capitalize()
+      wr_input_file = '/'.join(input_path.parts[-6:])  # don't keep the beginning of the file name to put in the header
+    else:
+      app_name = "NO NAME FOUND"
+      wr_input_file = input_file
     po = polib.pofile(input_file)
     out_po = polib.pofile(output_file) if Path(output_file).exists() else None
     po.header = f"""{self.target_language} Translations for {app_name} app.
@@ -243,14 +247,20 @@ by the model.
               already_translated += 1
               continue
 
-          context_translation = entry.msgstr if entry.msgstr else entry.msgid
           original_phrase = entry.msgid
+          if entry.msgid_plural:  # entry with plural management. First manage the singular case
+            context_translation = entry.msgstr_plural[0] if entry.msgstr_plural else entry.msgid_plural
+          else:
+            context_translation = entry.msgstr if entry.msgstr else entry.msgid
           translation, explanation = self.translate(original_phrase, context_translation)
           # Add explanation to comment
           if explanation:
             entry.comment = explanation
           # Update translation
-          entry.msgstr = translation
+          if entry.msgid_plural:  # entry with plural management. Update the singular case
+            entry.msgstr_plural[0] = translation
+          else:
+            entry.msgstr = translation
           logger.info(f"""==================
   {self.params.original_language}: "{original_phrase}"
   {self.params.context_language}: "{context_translation}"
@@ -258,6 +268,22 @@ by the model.
   Comment:{explanation if explanation else ''}
   """)
           sleep(1.0)  # Sleep for 1 second to avoid rate limiting
+
+          if entry.msgid_plural:  # entry with plural management. Now manage the plural case
+            original_phrase = entry.msgid_plural
+            context_translation = entry.msgstr_plural[1] if entry.msgstr_plural else entry.msgid_plural
+            translation, explanation = self.translate(original_phrase, context_translation)
+            # Update translation
+            entry.msgstr_plural[1] = translation
+            # Note: the plural explanation is not stored in the out po file.
+            logger.info(f"""================== PLURAL CASE ==================
+    {self.params.original_language}: "{original_phrase}"
+    {self.params.context_language}: "{context_translation}"
+    {self.target_language}: "{translation}"
+    Comment:{explanation if explanation else ''}  
+    """)
+            sleep(1.0)  # Sleep for 1 second to avoid rate limiting
+
           nb_translations += 1
     except Exception as e:
       logger.error(f"Error: {e}")
