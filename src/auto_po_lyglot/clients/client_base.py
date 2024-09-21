@@ -213,12 +213,13 @@ class AutoPoLyglotClient(ABC):
     logger.info(f"Translating {input_file} to {self.target_language} in {output_file}")
     input_path = Path(input_file)
     app_name = input_path.parents[4].name.capitalize()
+    wr_input_file = '/'.join(input_path.parts[-6:])  # don't keep the beginning of the file name to put in the header
     po = polib.pofile(input_file)
     out_po = polib.pofile(output_file) if Path(output_file).exists() else None
     po.header = f"""{self.target_language} Translations for {app_name} app.
 Copyright (C) {datetime.now().year} {self.params.owner}
 This file is distributed under the same license as the application.
-This file was generated from {input_file} by [Auto-po-lyglot](https://github.com/leolivier/auto-po-lyglot)
+This file was generated from {wr_input_file} by [Auto-po-lyglot](https://github.com/leolivier/auto-po-lyglot)
 using the {self.params.model} model. Depending on the model, it may contain some errors and should be reviewed
 by a human translator. Also depending on the model, each translation can be preceded by an explanation provided
 by the model.
