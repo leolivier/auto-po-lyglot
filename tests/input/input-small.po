@@ -35,3 +35,11 @@ msgid ""
 msgstr ""
 "%(follower_name)s a créé un nouveau %(followed_type)s "
 "\"%(followed_object_name)s\""
+
+#: chat/templates/chat/chat_rooms.html:47 chat/tests/tests_private.py:46
+#: chat/tests/tests_public.py:64 chat/tests/tests_public.py:94
+#, python-format
+msgid "%(nmsgs)s message"
+msgid_plural "%(nmsgs)s messages"
+msgstr[0] "%(nmsgs)s message"
+msgstr[1] "%(nmsgs)s messages"
