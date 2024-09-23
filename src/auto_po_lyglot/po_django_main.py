@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# pyright: reportAttributeAccessIssue=false
+
 import logging
 
 from . import ClientBuilder, ParamsLoader, system_prompt, user_prompt, locate_django_translation_files

@@ -1,3 +1,5 @@
+# pyright: reportInvalidStringEscapeSequence=false
+
 # This file contains the default system and user prompts for the LLMs. These prompts can be overriden in the .env file.
 # It also contains some examples of translations in the different languages. See after the prompts.
 

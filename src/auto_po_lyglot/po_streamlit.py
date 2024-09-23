@@ -1,3 +1,4 @@
+# pyright: reportAttributeAccessIssue=false
 from io import StringIO
 import logging
 import os
@@ -182,8 +183,8 @@ def run_llm(st_params):
       po_data = StringIO(st_params.input_po.getvalue().decode("utf-8")).read()
       # create a POfile instance
       po = polib.pofile(po_data)
+      nb_translations = 0
       try:
-        nb_translations = 0
         for entry in po:
           if entry.msgid and not entry.fuzzy:
             context_translation = entry.msgstr if entry.msgstr else entry.msgid

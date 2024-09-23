@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+# pyright: reportAttributeAccessIssue=false
+
 import logging
 from pathlib import Path
 from dotenv import load_dotenv
@@ -149,7 +150,7 @@ the context translation."""
     """
     self.additional_args = additional_args
 
-  def load(self):
+  def load(self) -> Params:
     "looks at args and returns an object with attributes of these args completed by the environ variables where needed"
     params = Params()
 
@@ -158,7 +159,7 @@ the context translation."""
 
     if args.show_prompts:
       params.show_prompts = True
-      return  # will exit just after showing prompts, no need to continue
+      return params  # will exit just after showing prompts, no need to continue
     else:
       params.show_prompts = False
 
@@ -282,8 +283,8 @@ def get_outfile_name(model_name, input_po, target_language, context_language):
     p = Path(input_po)
     parent = p.parent
     grandparent = parent.parent
-    context_lang_code = get_language_code(context_language)
-    target_code = get_language_code(target_language)
+    context_lang_code = get_language_code(context_language) or 'xx'
+    target_code = get_language_code(target_language) or 'xx'
     if parent.name == 'LC_MESSAGES' and grandparent.name == context_lang_code:
       # we're in something like .../locale/<lang_code>/LC_MESSAGES/file.po
       # let's try to build the same with the target language code
