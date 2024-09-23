@@ -191,6 +191,13 @@ class AutoPoLyglotClient(ABC):
     return format.format(**params)
 
   def process_translation(self, raw_result):
+    """
+    Process the raw translation result
+    Args:
+        raw_result (str): The raw translation result
+    Returns:
+        tuple(str,str): The translation and its explanation
+    """
     translation_result = raw_result.split('\n')
     translation = translation_result[0].strip(' "')
     explanation = None
@@ -202,6 +209,14 @@ class AutoPoLyglotClient(ABC):
     return translation, explanation
 
   def translate(self, phrase, context_translation):
+      """
+      Translate a single phrase using the given context translation
+      Args:
+          phrase (str): The phrase to translate
+          context_translation (str): The context translation
+      Returns:
+          str: The translated phrase and its explanation
+      """
       if self.target_language is None:
         raise PoLyglotException("Error:target_language must be set before trying to translate anything")
       system_prompt = self.get_system_prompt()
@@ -209,8 +224,7 @@ class AutoPoLyglotClient(ABC):
       raw_result = self.get_translation(system_prompt, user_prompt)
       return self.process_translation(raw_result)
 
-  def translate_pofile(self, input_file, output_file):
-    logger.info(f"Translating {input_file} to {self.target_language} in {output_file}")
+  def set_po_header_and_metadata(self, po, input_file):
     input_path = Path(input_file)
     if str(input_path.parents[1]) == 'LC_MESSAGES':
       app_name = input_path.parents[4].name.capitalize()
@@ -218,8 +232,6 @@ class AutoPoLyglotClient(ABC):
     else:
       app_name = "NO NAME FOUND"
       wr_input_file = input_file
-    po = polib.pofile(input_file)
-    out_po = polib.pofile(output_file) if Path(output_file).exists() else None
     po.header = f"""{self.target_language} Translations for {app_name} app.
 Copyright (C) {datetime.now().year} {self.params.owner}
 This file is distributed under the same license as the application.
@@ -233,58 +245,96 @@ by the model.
     po.metadata['Language'] = get_language_code(self.target_language).upper()
     po.metadata['PO-Revision-Date'] = f"{datetime.now():%Y-%m-%d %H:%M+00:00}\n"  # "2024-08-07 20:09+0200""
 
+  def _copy_entry(self, to_entry, from_entry):
+    for attr in ["msgid", "msgstr", "msgid_plural", "fuzzy",
+                 "obsolete", "comment", "msgctxt", "encoding",
+                 "occurrences", "tcomment", "flags"
+                 "previous_msgctxt", "previous_msgid",
+                 "previous_msgid_plural", "linenum"]:
+      setattr(to_entry, attr, getattr(from_entry, attr))
+    if from_entry.msgstr_plural:  # entry with plural management. Deep copy the plural case
+      to_entry.msgstr_plural = from_entry.msgstr_plural.copy()
+
+  def translate_entry(self, entry, out_po=None):
+    """
+    Translate a single entry
+    Args:
+        entry (polib.POEntry): The entry to translate
+        out_po (polib.POFile): The output po file if already existing
+    Returns:
+        nothing (the entry is updated in-place)
+    """
+    forced = False
+    if entry.msgid:
+      # dont translate fuzzy entries except if forced by params
+      if entry.fuzzy and not self.params.fuzzy:
+        return {"status": 'Fuzzy', "forced": forced}
+      if out_po:
+        out_entry = out_po.find(entry.msgid)
+        # don't translate again the existing translations except if forced by params
+        if out_entry:
+          if out_entry.msgstr != "" and not self.params.force:
+            self._copy_entry(entry, out_entry)
+            return {"status": 'Already', "forced": forced}
+          else:
+            forced = "True"
+      original_phrase = entry.msgid
+      if entry.msgid_plural:  # entry with plural management. First manage the singular case
+        context_translation = entry.msgstr_plural[0] if entry.msgstr_plural else entry.msgid_plural
+      else:
+        context_translation = entry.msgstr if entry.msgstr else entry.msgid
+      translation, explanation = self.translate(original_phrase, context_translation)
+      # Add explanation to comment
+      if explanation:
+        entry.comment = explanation
+      # Update translation
+      if entry.msgid_plural:  # entry with plural management. Update the singular case
+        entry.msgstr_plural[0] = translation
+      else:
+        entry.msgstr = translation
+      logger.info(f"""==================
+{self.params.original_language}: "{original_phrase}"
+{self.params.context_language}: "{context_translation}"
+{self.target_language}: "{translation}"
+Comment:{explanation if explanation else ''}
+""")
+
+      if entry.msgid_plural:  # entry with plural management. Now manage the plural case
+        original_phrase = entry.msgid_plural
+        context_translation = entry.msgstr_plural[1] if entry.msgstr_plural else entry.msgid_plural
+        translation, explanation = self.translate(original_phrase, context_translation)
+        # Update translation
+        entry.msgstr_plural[1] = translation
+        # Note: the plural explanation is **not** stored in the out po file.
+        logger.info(f"""================== PLURAL CASE ==================
+{self.params.original_language}: "{original_phrase}"
+{self.params.context_language}: "{context_translation}"
+{self.target_language}: "{translation}"
+Comment:{explanation if explanation else ''}
+""")
+        return {"status": 'Plural', "forced": forced}
+    return {"status": 'Singular', "forced": forced}
+
+  def translate_pofile(self, input_file, output_file):
+    logger.info(f"Translating {input_file} to {self.target_language} in {output_file}")
+    po = polib.pofile(input_file)
+    out_po = polib.pofile(output_file) if Path(output_file).exists() else None
+    self.set_po_header_and_metadata(po, input_file)
     try:
       nb_translations = 0
       already_translated = 0
+      forced = 0
+      fuzzy = 0
       for entry in po:
-        if entry.msgid and (self.params.fuzzy or not entry.fuzzy):
-
-          # don't translate again the existing translations except if forced
-          if out_po:
-            out_entry = out_po.find(entry.msgid)
-            if out_entry and out_entry.msgstr != "" and not self.params.force:
-              entry.msgstr = out_entry.msgstr
-              already_translated += 1
-              continue
-
-          original_phrase = entry.msgid
-          if entry.msgid_plural:  # entry with plural management. First manage the singular case
-            context_translation = entry.msgstr_plural[0] if entry.msgstr_plural else entry.msgid_plural
-          else:
-            context_translation = entry.msgstr if entry.msgstr else entry.msgid
-          translation, explanation = self.translate(original_phrase, context_translation)
-          # Add explanation to comment
-          if explanation:
-            entry.comment = explanation
-          # Update translation
-          if entry.msgid_plural:  # entry with plural management. Update the singular case
-            entry.msgstr_plural[0] = translation
-          else:
-            entry.msgstr = translation
-          logger.info(f"""==================
-  {self.params.original_language}: "{original_phrase}"
-  {self.params.context_language}: "{context_translation}"
-  {self.target_language}: "{translation}"
-  Comment:{explanation if explanation else ''}
-  """)
-          sleep(1.0)  # Sleep for 1 second to avoid rate limiting
-
-          if entry.msgid_plural:  # entry with plural management. Now manage the plural case
-            original_phrase = entry.msgid_plural
-            context_translation = entry.msgstr_plural[1] if entry.msgstr_plural else entry.msgid_plural
-            translation, explanation = self.translate(original_phrase, context_translation)
-            # Update translation
-            entry.msgstr_plural[1] = translation
-            # Note: the plural explanation is not stored in the out po file.
-            logger.info(f"""================== PLURAL CASE ==================
-    {self.params.original_language}: "{original_phrase}"
-    {self.params.context_language}: "{context_translation}"
-    {self.target_language}: "{translation}"
-    Comment:{explanation if explanation else ''}  
-    """)
-            sleep(1.0)  # Sleep for 1 second to avoid rate limiting
-
-          nb_translations += 1
+        res = self.translate_entry(entry, out_po)
+        if res['status'] == 'Already':
+          already_translated += 1
+        elif res['status'] == 'Fuzzy':
+          fuzzy += 1
+        elif res['forced'] == 'True':
+          forced += 1
+        sleep(0.5)  # Sleep for 1/2 second to avoid rate limiting
+        nb_translations += 1
     except Exception as e:
       logger.error(f"Error: {e}")
     # Save the new .po file even if there was an error to not lose what was translated
@@ -297,3 +347,6 @@ by the model.
     logger.info(f"Saved {output_file}, translated {nb_translations} entries out "
                 f"of {len(po)} entries, with {already_translated} entries already translated and not taken into account "
                 f"({percent_translated}%)")
+    if forced > 0:
+      logger.info(f"Forced {forced} entries")
+    return nb_translations, percent_translated, already_translated, forced, fuzzy
