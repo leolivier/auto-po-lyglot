@@ -12,6 +12,22 @@ def locate_django_translation_files(django_path, context_language, target_langua
   Parameters:
     django_path (str): The path to the Django project directory. If None, the current directory is used.
     context_language (str): The context language of the translations.
+    target_languages (List[str]): The target languages of the translations.
+
+  Returns:
+    List[str]: A dictionary of the form
+      { "paths to a context translation files": [
+          {"target_language": "path of translated file"},
+          {"target_language": "path of translated file"},
+         ...
+        ],
+        "paths another context translation files": [
+          {"target_language": "path of translated file"},
+          {"target_language": "path of translated file"},
+         ...
+        ],
+        ...
+      }. One for each Django application that contains a context translation file.
   """
 
   path = Path(django_path or '.')
