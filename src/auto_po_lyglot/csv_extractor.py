@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Converts output md files from transpopenai.py to CSV files."""
+from pathlib import PurePath
 import re
 import csv
 import sys
@@ -44,6 +45,16 @@ def extract_csv(input_file, output_file, languages=["English", "French", "Italia
         for (english, french), others in translations.items():
             row = {"English": english, "French": french, **others}
             writer.writerow(row)
+
+
+def extract_csv_translations(output_file, params):
+  csv_file = PurePath(output_file).with_suffix('.csv')
+  if not output_file.exists():
+    print(f"Error: Input file '{output_file}' does not exist.")
+    sys.exit(1)
+  languages = [params.original_language, params.context_language] + params.target_languages
+  extract_csv(output_file, csv_file, languages)
+  print("CSV extracted to file:", csv_file)
 
 
 def main():
