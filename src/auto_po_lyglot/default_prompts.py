@@ -1,5 +1,3 @@
-# pyright: reportInvalidStringEscapeSequence=false
-
 # This file contains the default system and user prompts for the LLMs. These prompts can be overriden in the .env file.
 # It also contains some examples of translations in the different languages. See after the prompts.
 
@@ -40,7 +38,7 @@ and your output would be, assuming an explanation is needed:
 ```
 Also, sometimes, the sentence to be translated and its context translation will contain placheholders or HTML markers that you
 are not allowed to translate and must keep in the same place in your translation. The placeholders can be identified with the
-following Python regex: r'{{[^}}]*}}|%%[sd]|%%\([^)]*\)s' and the HTML markers with the following Python regex: r'<[^>]*>'.
+following Python regex: r'{{[^}}]*}}|%%[sd]|%%\\([^)]*\\)s' and the HTML markers with the following Python regex: r'<[^>]*>'.
 Placeholders as well as HYML markers must be placed in the same semantic location in your translation as in the original sentence
 and in the contextual translation. Sometimes, the name of the placeholders can be relevant for understanding the sentence so you
 can use them to understand the contex but it is very important that you do not translate them and you keep them in the right place
