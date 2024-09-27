@@ -44,7 +44,7 @@ class OpenAIClient(OpenAIAPICompatibleClient):
 
 class OllamaClient(OpenAIAPICompatibleClient):
     def __init__(self, params, target_language=None):
-        params.model = params.model or "llama3.1:8b"  # default model if not provided
+        params.model = params.model or "llama3.2:3b"  # default model if not provided
         params.ollama_base_url = params.ollama_base_url or 'http://localhost:11434/v1'  # default Ollama local server URL
         super().__init__(params, target_language)
         self.client = OpenAI(api_key='Ollama_Key_Unused_But_Required', base_url=self.params.ollama_base_url)
