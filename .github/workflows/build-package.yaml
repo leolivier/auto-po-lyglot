@@ -146,4 +146,4 @@ jobs:
         # EXTREMELY WEIRD: if you remove these 2 lines, the test fails because LLM_MODEL is not set.
         echo "Running pytest with environment variables:"
         env | grep -E 'LOG_LEVEL|INPUT_PO|ORIGINAL_LANGUAGE|CONTEXT_LANGUAGE|TARGET_LANGUAGES|LLM_CLIENT|LLM_MODEL|OLLAMA_BASE_URL'
-        pytest -m 'not gentestvalues' -m 'not asserts_llm_results' -x -s -v
+        pytest -m 'not gentestvalues and not asserts_llm_results' -x -s -v
