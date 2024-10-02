@@ -57,9 +57,22 @@ It iterates over the provided target languages, and for each language iterates o
 using the provided client, model and prompt, translates the original phrase into the target language with the help of
 the context translation."""
 
-  def parse_args(self):
-    parser = argparse.ArgumentParser(description=self.parser_description)
-    # Add arguments
+  def __init__(self, additional_args=None):
+    """
+    additional_args is a list of dictionaries where each dictionary represents an additional argument that can be given to
+    the script. Each dictionary must contain the following key:
+    - arg: the argument itself (e.g. '--foo' or '-f') or an array of arguments (e.g. ['-'f', '--foo'])
+    - help: the help message associated to the argument
+    Each dictionary can contain the following keys:
+    - type: the type of the argument (e.g. str, int, float)
+    or
+    - action: the action associated to the argument (e.g. 'store_true')
+    - env: the environment variable associated to the argument (e.g. 'FOO')
+    - default: the default value of the argument (e.g. 'bar')
+    """
+    self.additional_args = additional_args
+
+  def add_parser_arguments(self, parser):
     parser.add_argument('-p', '--show-prompts',
                         action='store_true',
                         help='show the prompts used for translation and exits')
@@ -99,6 +112,10 @@ the context translation."""
                              'In this case, the output po file will be created as '
                              '.../locale/<target language code>/LC_MESSAGES/<input po file name>. Supersedes '
                              'OUTPUT_PO in .env.')
+    parser.add_argument('-oo', '--overwrite-output',
+                        action='store_true',
+                        help='Overwrites the output po file if it already exists. Supersedes OVERWRITE_OUTPUT in .env. '
+                             'Default is False')
     parser.add_argument('-f', '--force',
                         action='store_true',
                         help='Forces translating already translated entries. Supersedes FORCE in .env. Default is False')
@@ -132,60 +149,33 @@ the context translation."""
             help=arg.get('help')
           )
 
-    # Analyze the arguments
-    return parser.parse_args()
+  def load_params_from_env(self, args=None):
+    "Update missing args from the .env file"
 
-  def __init__(self, additional_args=None):
-    """
-    additional_args is a list of dictionaries where each dictionary represents an additional argument that can be given to
-    the script. Each dictionary must contain the following key:
-    - arg: the argument itself (e.g. '--foo' or '-f') or an array of arguments (e.g. ['-'f', '--foo'])
-    - help: the help message associated to the argument
-    Each dictionary can contain the following keys:
-    - type: the type of the argument (e.g. str, int, float)
-    or
-    - action: the action associated to the argument (e.g. 'store_true')
-    - env: the environment variable associated to the argument (e.g. 'FOO')
-    - default: the default value of the argument (e.g. 'bar')
-    """
-    self.additional_args = additional_args
-
-  def load(self) -> Params:
-    "looks at args and returns an object with attributes of these args completed by the environ variables where needed"
-    params = Params()
-
-    # Parse the command line arguments
-    args = self.parse_args()
-
-    if args.show_prompts:
-      params.show_prompts = True
-      return params  # will exit just after showing prompts, no need to continue
-    else:
-      params.show_prompts = False
-
+    params = ParamsLoader()
     load_dotenv(override=True)
 
-    if args.debug or (not args.verbose and environ.get('LOG_LEVEL', None) == 'DEBUG'):
+    if (args and args.debug) or ((args and not args.verbose) and environ.get('LOG_LEVEL', None) == 'DEBUG'):
       params.log_level = logging.DEBUG
-    elif args.verbose or environ.get('LOG_LEVEL', None) == 'INFO':
+    elif (args and args.verbose) or environ.get('LOG_LEVEL', None) == 'INFO':
       params.log_level = logging.INFO
     else:
       params.log_level = logging.WARNING
     set_all_loggers_level(params.log_level)
 
     # original language
-    params.original_language = args.original_language or environ.get('ORIGINAL_LANGUAGE', 'English')
+    params.original_language = (args and args.original_language) or environ.get('ORIGINAL_LANGUAGE', 'English')
     # context translation language
-    params.context_language = args.context_language or environ.get('CONTEXT_LANGUAGE', 'French')
+    params.context_language = (args and args.context_language) or environ.get('CONTEXT_LANGUAGE', 'French')
     # LLM client and model
-    params.llm_client = args.llm or environ.get('LLM_CLIENT', 'ollama')
-    params.model = args.model or environ.get('LLM_MODEL', None)
+    params.llm_client = (args and args.llm) or environ.get('LLM_CLIENT', 'ollama')
+    params.model = (args and args.model) or environ.get('LLM_MODEL', None)
 
     # ollama base url if needed
     params.ollama_base_url = environ.get('OLLAMA_BASE_URL', 'http://localhost:11434/v1')
 
     # the target languages to test for translation
-    params.target_languages = [args.target_language] if args.target_language else \
+    params.target_languages = [args.target_language] if args and args.target_language else \
       environ.get('TARGET_LANGUAGES', 'Spanish').split(',')
 
     params.system_prompt = environ.get('SYSTEM_PROMPT', None)
@@ -196,18 +186,20 @@ the context translation."""
     if params.user_prompt:
       logger.debug(f"USER_PROMPT environment variable is set to '{params.user_prompt}'")
 
-    params.temperature = args.temperature or float(environ.get('TEMPERATURE', 0.2))
+    params.temperature = (args and args.temperature) or float(environ.get('TEMPERATURE', 0.2))
 
-    params.input_po = args.input_po or environ.get('INPUT_PO', None)
-    params.output_po = args.output_po or environ.get('OUTPUT_PO', None)
+    params.input_po = (args and args.input_po) or environ.get('INPUT_PO', None)
+    params.output_po = (args and args.output_po) or environ.get('OUTPUT_PO', None)
 
-    params.fuzzy = args.fuzzy or environ.get('FUZZY', False)
-    params.force = args.force or environ.get('FORCE', False)
-    params.compile = args.compile or environ.get('COMPILE', False)
+    params.fuzzy = (args and args.fuzzy) or environ.get('FUZZY', False)
+    params.force = (args and args.force) or environ.get('FORCE', False)
+    params.overwrite_output = (args and args.overwrite_output) or environ.get('OVERWRITE_OUTPUT', False)
+    params.compile = (args and args.compile) or environ.get('COMPILE', False)
 
-    params.owner = args.owner or environ.get('OWNER', '<OWNER>')
-    params.owner_mail = args.owner_mail or environ.get('OWNER_MAIL', '<OWNER EMAIL>')
+    params.owner = (args and args.owner) or environ.get('OWNER', '<OWNER>')
+    params.owner_mail = (args and args.owner_mail) or environ.get('OWNER_MAIL', '<OWNER EMAIL>')
 
+    params.show_prompts = False
     # generic processing of additional arguments
     if self.additional_args:
       for argument in self.additional_args:
@@ -221,6 +213,26 @@ the context translation."""
         arg_name = arg_name.lstrip('-').lower().replace('-', '_')
         val = getattr(args, arg_name) or environ.get(argument.get('env', 'UNDEFINED_VARIABLE'), argument.get('default', None))
         setattr(params, arg_name, val)
+
+    return params
+
+  def load(self) -> Params:
+    "looks at args and returns an object with attributes of these args completed by the environ variables where needed"
+
+    # Parse the command line arguments
+    parser = argparse.ArgumentParser(description=self.parser_description)
+    # Add arguments
+    self.add_parser_arguments(parser)
+    # Analyze the arguments
+    args = parser.parse_args()
+
+    if args.show_prompts:
+      params = Params()
+      params.show_prompts = True
+      return params  # will exit just after showing prompts, no need to continue
+
+    # Update missing args from the .env file
+    params = self.load_params_from_env(args)
 
     logger.info(f"Loaded Params: {params.__dict__}")
     return params
@@ -270,21 +282,31 @@ def get_language_code(language_name):
         return None
 
 
-def get_outfile_name(model_name, input_po, target_language, context_language):
-    """
-    Generates a unique output file name based on the given model name and the parameters.
+def get_outfile_name(llm_client):
 
-    Args:
-        model_name (str): The name of the model.
-        params (TranspoParams): The parameters for the translation.
-    Returns:
-        Path: A unique output po file name in the format "{input_po}_{target_language}_{i}.po".
     """
-    p = Path(input_po)
+    Compute the output file name based on the input file name and the target language code
+    If the input file is in a directory like .../locale/<context_lang_code>/LC_MESSAGES/file.po,
+    the output file will be in a directory like .../locale/<target_lang_code>/LC_MESSAGES/file.po
+    Otherwise, the output file name will be the input file name with the model name and the target language code appended.
+    If the output file already exists and llm_client.params.overwrite_output is False, a number will be appended to the
+    filename to make it unique.
+
+    Parameters
+    ----------
+    llm_client (LLMClient) : ClientBase
+        The llm client to use
+
+    Returns
+    -------
+    Path
+        The output file name
+    """
+    p = Path(llm_client.params.input_po)
     parent = p.parent
     grandparent = parent.parent
-    context_lang_code = get_language_code(context_language) or 'xx'
-    target_code = get_language_code(target_language) or 'xx'
+    context_lang_code = get_language_code(llm_client.params.context_language) or 'xx'
+    target_code = get_language_code(llm_client.target_language) or 'xx'
     if parent.name == 'LC_MESSAGES' and grandparent.name == context_lang_code:
       # we're in something like .../locale/<lang_code>/LC_MESSAGES/file.po
       # let's try to build the same with the target language code
@@ -293,11 +315,11 @@ def get_outfile_name(model_name, input_po, target_language, context_language):
       dir.mkdir(parents=True, exist_ok=True)
       outfile = dir / p.name
     else:  # otherwise, just add the model name and the target language code in the file name
-      model_name = model_name.replace(':', '-')
+      model_name = llm_client.params.model.replace(':', '-')
       outfile = p.with_suffix(f'.{model_name}.{target_code}.po')
 
     logger.info(f"Output file: {outfile}")
-    if outfile.exists():
+    if outfile.exists() and not llm_client.params.overwrite_output:
       logger.info("Output file already exists, won't overwrite.")
       i = 0
       i_outfile = outfile
