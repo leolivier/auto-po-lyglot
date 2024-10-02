@@ -5,6 +5,23 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "Python Debugger: pytest",
+			"type": "debugpy",
+			"request": "launch",
+			"module": "pytest",
+			"args": [
+				"-m",
+				"not gentestvalues and not asserts_llm_results",
+				"-v",
+				"-x",
+				"-s",
+				"-k",
+				"test_django"
+				// "accounts"
+			],
+			"justMyCode": false,
+		},
+		{
 			"name": "Python Debugger: Current File",
 			"type": "debugpy",
 			"request": "launch",
@@ -12,14 +29,20 @@
 			"console": "integratedTerminal",
 			"justMyCode": false,
 			"args": [
-				"--llm", "ollama",
-				"--model", "gemma2:2b",
-				"--input_po", "tests/input/fr/LC_MESSAGES/input.po",
-				"--target_language", "Italian",
-				"--context_language", "English",
-				"--original_language", "French",
+				"--llm",
+				"ollama",
+				"--model",
+				"gemma2:2b",
+				"--input_po",
+				"tests/input/fr/LC_MESSAGES/input.po",
+				"--target_language",
+				"Italian",
+				"--context_language",
+				"English",
+				"--original_language",
+				"French",
 				"--verbose"
 			]
-		}
+		},
 	]
 }
