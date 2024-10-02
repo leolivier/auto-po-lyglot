@@ -360,6 +360,7 @@ Comment:{explanation if explanation else ''}
     to_be_translated = len(po) - already_translated
     if to_be_translated == 0:
       logger.info(f"Nothing to translate in {output_file}")
+      percent_translated = 100
     else:
       percent_translated = round(nb_translations / (len(po)-already_translated) * 100, 2)
       logger.info(f"Saved {output_file}, translated {nb_translations} entries out "
