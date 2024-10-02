@@ -41,8 +41,6 @@ msgid ""
 "%(follower_name)s has created a new %(followed_type)s "
 "\"%(followed_object_name)s\""
 msgstr ""
-"%(follower_name)s a créé un nouveau %(followed_type)s "
-"\"%(followed_object_name)s\""
 
 #. Explanation: This Italian translation maintains the structure and meaning
 #. of the original English phrase. The placeholder %(nmsgs)s is kept in its
