@@ -43,3 +43,7 @@ msgid "%(nmsgs)s message"
 msgid_plural "%(nmsgs)s messages"
 msgstr[0] "%(nmsgs)s message"
 msgstr[1] "%(nmsgs)s messages"
+
+#, fuzzy, python-format
+msgid "fuzzy translation"
+msgstr "traduction floue"
