@@ -54,3 +54,12 @@ auto_djangopo_lyglot = "auto_po_lyglot.po_django_main:main"
 
 [tool.hatch.build]
 include = ["src"]
+
+[tool.pytest.ini_options]
+markers = [
+  "gentestvalues: marks tests as generating test values (deselect with '-m \"not genetestvalues\"')...",
+  "asserts_llm_results: tests which can fail because they checking LLM results. (deselect with '-m \"not asserts_llm_results\"')...",
+]
+testpaths = [
+    "./tests",
+]
