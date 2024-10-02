@@ -1,0 +1,56 @@
+# Italian Translations for NO NAME FOUND app.
+# Copyright (C) 2024 Olivier LEVILLAIN
+# This file is distributed under the same license as the application.
+# This file was generated from tests/input/locale/fr/LC_MESSAGES/test.po by [Auto-po-lyglot](https://github.com/leolivier/auto-po-lyglot)
+# using the qwen2.5:3b model. Depending on the model, it may contain some errors and should be reviewed
+# by a human translator. Also depending on the model, each translation can be preceded by an explanation provided
+# by the model.
+# Olivier LEVILLAIN <OWNER EMAIL>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Cousins Matter 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-08-07 20:09+0200\n"
+"PO-Revision-Date: 2024-09-25 20:18+00:00\n"
+"\n"
+"Last-Translator: Auto-po-lyglot using qwen2.5:3b (https://github.com/leolivier/auto-po-lyglot)\n"
+"Language-Team: French <LL@li.org>\n"
+"Language: IT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#. Explanation: The French translation, "Les Cousins Comptent!", translates to
+#. "The Cousins Count!" in English.  This is a direct translation of the
+#. French phrase and captures the essence of the original sentence.
+#: cm_main/apps.py:8
+msgid "Cousins Matter!"
+msgstr "I Cousins sono importanti!"
+
+#: cm_main/followers.py:61 cm_main/tests/tests_followers.py:80
+#, python-format
+msgid "New %(followed_type)s \"%(followed_object_name)s\""
+msgstr "Nouveau %(followed_type)s \"%(followed_object_name)s\""
+
+#: cm_main/followers.py:65
+#, python-format
+msgid ""
+"%(follower_name)s has created a new %(followed_type)s "
+"\"%(followed_object_name)s\""
+msgstr ""
+
+#. Explanation: This Italian translation maintains the structure and meaning
+#. of the original English phrase. The placeholder %(nmsgs)s is kept in its
+#. same position to preserve the context, indicating a number followed by
+#. "message". In French, this translates as "%(nmsgs)s message", which aligns
+#. with the given French translation.
+#: chat/templates/chat/chat_rooms.html:47 chat/tests/tests_private.py:46
+#: chat/tests/tests_public.py:64 chat/tests/tests_public.py:94
+#, python-format
+msgid "%(nmsgs)s message"
+msgid_plural "%(nmsgs)s messages"
+msgstr[0] "%(nmsgs)s messaggio"
+msgstr[1] "%(nmsgs)s messaggi"

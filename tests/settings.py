@@ -1,7 +1,7 @@
 # Where tests results will be stored. Can be overriden on the command line
 from os import environ
 
-
+INPUT_DIRECTORY = "./tests/input"
 OUTPUT_DIRECTORY = "./tests/output"
 
 # Some ambiguous sentences in the ORIGINAL_LANGUAGE and their CONTEXT_LANGUAGE translations for testing

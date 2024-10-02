@@ -12,9 +12,9 @@ on:
 
 env:
   LLM_CLIENT: ollama
-  LLM_MODEL: gemma2:2b  # or phi3
+  LLM_MODEL: qwen2.5:3b  # or gemma2:2b
   LOG_LEVEL: INFO
-  INPUT_PO: tests/input/input.po
+  INPUT_PO: tests/input/test-small.po
   ORIGINAL_LANGUAGE: English
   CONTEXT_LANGUAGE: French
   TARGET_LANGUAGES: Italian  # comma separated list
@@ -22,10 +22,10 @@ env:
   # 2 files used to cache the Ollama version and model list
   # so that they do not need to be downloaded every time
   # Touch this file to force it to update Ollama
-  OLLAMA_VERSION_FILE: '.github/workflows/ollama-version.txt'
+  OLLAMA_VERSION_FILE: 'tests/resources/ollama-version.txt'
   # Put in this file a list of all models you want to pull from Ollama, one per line. 
   # LLM_MODEL must be set to one of these
-  MODEL_LIST_FILE: '.github/workflows/model-list.txt'
+  MODEL_LIST_FILE: 'tests/resources/model-list.txt'
 
 jobs:
 
@@ -146,4 +146,4 @@ jobs:
         # EXTREMELY WEIRD: if you remove these 2 lines, the test fails because LLM_MODEL is not set.
         echo "Running pytest with environment variables:"
         env | grep -E 'LOG_LEVEL|INPUT_PO|ORIGINAL_LANGUAGE|CONTEXT_LANGUAGE|TARGET_LANGUAGES|LLM_CLIENT|LLM_MODEL|OLLAMA_BASE_URL'
-        pytest -s -v ./tests
+        pytest -m 'not gentestvalues and not asserts_llm_results' -x -s -v

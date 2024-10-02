@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pyright: reportAttributeAccessIssue=false
 
 import logging
 from pathlib import Path
@@ -36,8 +37,7 @@ def main():
                 f"{params.context_language} -> {params.target_languages} with an {params.llm_client} client")
     for target_language in params.target_languages:
       client.target_language = target_language
-      output_file = params.output_po or get_outfile_name(client.params.model, params.input_po,
-                                                         target_language, params.context_language)
+      output_file = params.output_po or get_outfile_name(client)
       # Load input .po file
       assert params.input_po, "Input .po file not provided"
       assert Path(params.input_po).exists(), f"Input .po file {params.input_po} does not exist"

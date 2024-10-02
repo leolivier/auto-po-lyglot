@@ -1,0 +1,2 @@
+qwen2.5:3b
+gemma2:2b
