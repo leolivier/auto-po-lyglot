@@ -166,9 +166,8 @@ def streamlit_main():
       if not st_params.input_po:
         st.error("No .po file provided!", icon="🔥")
       else:
-        data = run_llm(st_params)
-        output_file = get_outfile_name(st_params.model, st_params.input_po.name,
-                                       st_params.target_language, st_params.context_language)
+        client, data = run_llm(st_params)
+        output_file = get_outfile_name(client)
         st.download_button(label="Download translated .po", data=data, file_name=output_file.name, mime="text/plain")
 
 
@@ -212,7 +211,7 @@ def run_llm(st_params):
       status.update(label=f"Translated `{nb_translations}` entries out "
                           f"of `{len(po)}` entries (`{percent_translated}%`)")
 
-    return po.__unicode__()
+    return client, po.__unicode__()
 
 
 if __name__ == "__main__":

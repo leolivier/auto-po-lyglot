@@ -170,11 +170,11 @@ class AutoPoLyglotClient(ABC):
       raise PoLyglotException(f"examples.py does not contain an example for these piece: {str(e)}")
 
     system_prompt = format.format(**prompt_params)
-    if self.first:
-      logger.info(f"First system prompt:\n{system_prompt}")
-      self.first = False
-    else:
-      logger.debug(f"System prompt:\n{system_prompt}")
+    # if self.first:
+    #   logger.info(f"First system prompt:\n{system_prompt}")
+    #   self.first = False
+    # else:
+    logger.debug(f"System prompt:\n{system_prompt}")
     return system_prompt
 
   def get_user_prompt(self, phrase, context_translation):
@@ -248,7 +248,7 @@ by the model.
   def _copy_entry(self, to_entry, from_entry):
     for attr in ["msgid", "msgstr", "msgid_plural", "fuzzy",
                  "obsolete", "comment", "msgctxt", "encoding",
-                 "occurrences", "tcomment", "flags"
+                 "occurrences", "tcomment", "flags",
                  "previous_msgctxt", "previous_msgid",
                  "previous_msgid_plural", "linenum"]:
       setattr(to_entry, attr, getattr(from_entry, attr))
@@ -265,57 +265,71 @@ by the model.
         nothing (the entry is updated in-place)
     """
     forced = False
-    if entry.msgid:
-      # dont translate fuzzy entries except if forced by params
-      if entry.fuzzy and not self.params.fuzzy:
-        return {"status": 'Fuzzy', "forced": forced}
-      if out_po:
-        out_entry = out_po.find(entry.msgid)
-        # don't translate again the existing translations except if forced by params
-        if out_entry:
-          if out_entry.msgstr != "" and not self.params.force:
-            self._copy_entry(entry, out_entry)
-            return {"status": 'Already', "forced": forced}
-          else:
-            forced = "True"
-      original_phrase = entry.msgid
-      if entry.msgid_plural:  # entry with plural management. First manage the singular case
-        context_translation = entry.msgstr_plural[0] if entry.msgstr_plural else entry.msgid_plural
-      else:
-        context_translation = entry.msgstr if entry.msgstr else entry.msgid
-      translation, explanation = self.translate(original_phrase, context_translation)
-      # Add explanation to comment
-      if explanation:
-        entry.comment = explanation
-      # Update translation
-      if entry.msgid_plural:  # entry with plural management. Update the singular case
-        entry.msgstr_plural[0] = translation
-      else:
-        entry.msgstr = translation
-      logger.info(f"""==================
+    if not entry.msgid:
+      return {"status": 'Empty', "forced": forced}
+    # dont translate fuzzy entries except if forced by 'fuzzy' param
+    if entry.fuzzy and not self.params.fuzzy:
+      return {"status": 'Fuzzy', "forced": forced}
+    if out_po:
+      out_entry = out_po.find(entry.msgid)
+      # don't translate again the existing translations except if forced by params
+      if out_entry:
+        if ((out_entry.msgstr != "" or
+             (out_entry.msgid_plural and out_entry.msgstr_plural[0] != ""))
+            and not self.params.force):
+          self._copy_entry(entry, out_entry)
+          return {"status": 'Already', "forced": forced}
+        else:
+          forced = "True"
+    original_phrase = entry.msgid
+    if entry.msgid_plural:  # entry with plural management. First manage the singular case
+      context_translation = entry.msgstr_plural[0] if entry.msgstr_plural else entry.msgid_plural
+    else:
+      context_translation = entry.msgstr if entry.msgstr else entry.msgid
+    translation, explanation = self.translate(original_phrase, context_translation)
+    # Add explanation to comment
+    if explanation:
+      entry.comment = explanation
+    # Update translation
+    if entry.msgid_plural:  # entry with plural management. Update the singular case
+      entry.msgstr_plural[0] = translation
+    else:
+      entry.msgstr = translation
+    logger.info(f"""==================
 {self.params.original_language}: "{original_phrase}"
 {self.params.context_language}: "{context_translation}"
 {self.target_language}: "{translation}"
 Comment:{explanation if explanation else ''}
 """)
 
-      if entry.msgid_plural:  # entry with plural management. Now manage the plural case
-        original_phrase = entry.msgid_plural
-        context_translation = entry.msgstr_plural[1] if entry.msgstr_plural else entry.msgid_plural
-        translation, explanation = self.translate(original_phrase, context_translation)
-        # Update translation
-        entry.msgstr_plural[1] = translation
-        # Note: the plural explanation is **not** stored in the out po file.
-        logger.info(f"""================== PLURAL CASE ==================
+    if entry.msgid_plural:  # entry with plural management. Now manage the plural case
+      original_phrase = entry.msgid_plural
+      context_translation = entry.msgstr_plural[1] if entry.msgstr_plural else entry.msgid_plural
+      translation, explanation = self.translate(original_phrase, context_translation)
+      # Update translation
+      entry.msgstr_plural[1] = translation
+      # Note: the plural explanation is **not** stored in the out po file.
+      logger.info(f"""================== PLURAL CASE ==================
 {self.params.original_language}: "{original_phrase}"
 {self.params.context_language}: "{context_translation}"
 {self.target_language}: "{translation}"
 Comment:{explanation if explanation else ''}
 """)
-        return {"status": 'Plural', "forced": forced}
+      return {"status": 'Plural', "forced": forced}
     return {"status": 'Singular', "forced": forced}
 
   def translate_pofile(self, input_file, output_file):
+    """
+    Translate a .po file (given by input_file) from its original language to the target language and saves it
+    to output_file. If the output_file already exists, it will be overwritten, otherwise it will be created.
+    The function returns a tuple containing:
+      - the number of translated entries,
+      - the percent of translated entries,
+      - the number of entries that were already translated and not taken into account
+        (if output_file already exists and force=False),
+      - the number of forced (ie overwritten) entries (if output_file already exists and force=True),
+      - and the number of fuzzy entries not taken into account (if fuzzy=False).
+    """
     logger.info(f"Translating {input_file} to {self.target_language} in {output_file}")
     po = polib.pofile(input_file)
     out_po = polib.pofile(output_file) if Path(output_file).exists() else None
@@ -343,10 +357,13 @@ Comment:{explanation if explanation else ''}
       logger.info(f"Compiling {output_file}")
       mo_output_file = Path(output_file).with_suffix('.mo')
       po.save_as_mofile(mo_output_file)
-    percent_translated = round(nb_translations / (len(po)-already_translated) * 100, 2)
-    logger.info(f"Saved {output_file}, translated {nb_translations} entries out "
-                f"of {len(po)} entries, with {already_translated} entries already translated and not taken into account "
-                f"({percent_translated}%)")
-    if forced > 0:
-      logger.info(f"Forced {forced} entries")
+    to_be_translated = len(po) - already_translated
+    if to_be_translated == 0:
+      logger.info(f"Nothing to translate in {output_file}")
+    else:
+      percent_translated = round(nb_translations / (len(po)-already_translated) * 100, 2)
+      logger.info(f"Saved {output_file}, translated {nb_translations} entries out "
+                  f"of {len(po)} entries, with {already_translated} entries already translated and not taken into account "
+                  f"({percent_translated}%)")
+      logger.info(f"{forced} forced entries, {fuzzy} fuzzy entries")
     return nb_translations, percent_translated, already_translated, forced, fuzzy
