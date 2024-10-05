@@ -204,10 +204,10 @@ class TestTranspo:
       assert entry.msgid_plural == out_entry.msgid_plural, \
         f"{entry.msgid_plural} should be the same as {out_entry.msgid_plural}"
       if entry.msgstr_plural:
-        assert 'msgstr_plural' in out_entry and out_entry.msgstr_plural != '', \
+        assert out_entry.msgstr_plural and out_entry.msgstr_plural != '', \
           f"{out_entry.msgid_plural} should not be empty"
       if isinstance(entry.msgstr, list):
         assert isinstance(out_entry.msgstr, list), \
-          "{out_entry.msgid_plural} should be a list"
+          "{out_entry.msgid} should translate to single and plurals"
         assert len(entry.msgstr) == len(out_entry.msgstr), \
-          "{out_entry.msgid_plural} should have the same number of entries as {entry.msgid_plural}"
+          "{out_entry.msgid} should have the same number of translations as {entry.msgid}"
