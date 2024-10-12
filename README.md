@@ -1,21 +1,3 @@
-> ToC
-* [Goal of this project](#goal-of-this-project)
-* [Install](#install)
-  * [Prerequisite](#prerequisite)
-  * [Install from PyPi](#install-from-pypi)
-  * [Install from sources](#install-from-sources)
-* [Configuration](#configuration)
-  * [The .env file](#the-env-file)
-    * [Only for the UI](#only-for-the-ui)
-* [Run it:](#run-it)
-  * [Running with the UI](#running-with-the-ui)
-    * [Running the UI from the command line](#running-the-ui-from-the-command-line)
-  * [Running from the Command Line](#running-from-the-command-line)
-* [Using Docker](#using-docker)
-  * [Create Docker image](#create-docker-image)
-  * [Running the docker image](#running-the-docker-image)
-* [COMING SOON](#coming-soon)
-
 # Goal of this project
 The goal of this project is to use various LLMs to help translate po files using a first already translated file.
 
