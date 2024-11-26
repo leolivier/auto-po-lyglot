@@ -1,5 +1,5 @@
 # Goal of this project
-The goal of this project is to use various LLMs to help translate po files using a first already translated file.
+The goal of this project is to use various LLMs to help translate po files using a first already translated file to provide context for short pieces of text otherwise possibly very ambiguous.
 
 For example, you have a .po file with msgids in English and msgstrs in French: using this file, you can ask the tool to translate the .po file into any other language. The first translation helps to disambiguate the very short sentences or parts of sentences that are usually found in .po files.
 
